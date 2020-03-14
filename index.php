@@ -1,6 +1,4 @@
-<?php
-session_start();
-?>
+<?php session_start(); ?>
 
 <!DOCTYPE html>
 <html>
@@ -13,20 +11,12 @@ session_start();
 
 <body>
 <?php
+include 'func_aux.php';
 // define variables and set to empty values
 $pswdErr = "";
 $user = $pswd = "";
 
-// Create connection
-$conn = new mysqli("localhost", "rsesma", "Amsesr.1977", "comandes");
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$conn->query("SET NAMES 'utf8'");
-$conn->query("SET CHARACTER SET utf8");
-$conn->query("SET SESSION collation_connection = 'utf8_unicode_ci'");
+$conn = connect();
 
 // get UF data for UF drop-down
 $stmt = $conn -> prepare('SELECT * FROM uf');
@@ -57,13 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
-function clear_input($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
-}
 ?>
 
 <div class="container">
@@ -76,7 +59,7 @@ function clear_input($data) {
         <div class="form-group">
             <label for="uf">Unitat de convivència:</label>
             <select name="uf" class="custom-select">
-                echo "<option selected></option>";
+                <option selected></option>
                 <?php while ($r = mysqli_fetch_array($duf)) {
                     echo "<option value=".$r["uf"].">".$r["descrip"]."</option>";
                 } ?>
@@ -90,6 +73,8 @@ function clear_input($data) {
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
+
+<?php $conn->close(); ?>
 
 </body>
 </html>

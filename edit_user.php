@@ -1,33 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add user</title>
-    <meta charset="utf-8">
-</head>
-
-<body>
 <?php
-// Create connection
-$conn = new mysqli("localhost", "rsesma", "Amsesr.1977", "comandes");
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'func_aux.php';
+$conn = connect();
+$stmt = $conn -> prepare("SELECT * FROM uf");
+$stmt->execute();
+$uf = $stmt->get_result();
+while ($r = mysqli_fetch_array($uf)) {
+    if ($r["psswd"]==NULL) {
+        // symbols to use
+        $symbols = 'abcdefghijklmnopqrstuvwxyz';
+        $symbols .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $symbols .= '1234567890';
+        $symbols .= '._';
+        $symbols_length = strlen($symbols) - 1;        //strlen starts from 0 so to get number of characters deduct 1
 
-$pswd = password_hash("amsesr2108", PASSWORD_DEFAULT);
+        $pass = '';
+        $length = 8;
+        for ($i = 0; $i < $length; $i++) {
+            $n = rand(0, $symbols_length);      // get a random character from the string with all characters
+            $pass .= $symbols[$n];              // add the character to the password string
+        }
 
-// insert new uf
-// $sql = "INSERT INTO users (user_id, username, password) VALUES (1, 'rsesma', '".$pswd."')";
+        $pswd = password_hash($pass, PASSWORD_DEFAULT);
+        $stmt = $conn -> prepare("UPDATE uf SET psswd =? WHERE uf=?");
+        $stmt->bind_param('si',$pswd,$r["uf"]);
+        $stmt->execute();
 
-// update existing uf
-$sql = "UPDATE uf SET psswd = '".$pswd."' WHERE uf=3";
-
-if ($conn->query($sql)) {
-  echo "Query executed.";
-} else{
-  echo "Query error.";
+        echo "uf = ".$r["uf"]."    pswd = ".$pass."<br>";
+    }
 }
 ?>
-
-</body>
-</html>

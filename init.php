@@ -1,6 +1,4 @@
-<?php
-session_start();
-?>
+<?php session_start(); ?>
 
 <!DOCTYPE html>
 <html>
@@ -12,33 +10,13 @@ session_start();
 </head>
 
 <body>
-
 <?php
+include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GET['uf']) || $_SERVER["REQUEST_METHOD"] == "POST")) {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf'])) {
     $uf = $_GET["uf"];
-
-    // Create connection
-    $conn = new mysqli("localhost", "rsesma", "Amsesr.1977", "comandes");
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $conn->query("SET NAMES 'utf8'");
-    $conn->query("SET CHARACTER SET utf8");
-    $conn->query("SET SESSION collation_connection = 'utf8_unicode_ci'");
-
-    // get UC descrip
-    $stmt = $conn -> prepare('SELECT descrip FROM uf WHERE uf = ?');
-    $stmt->bind_param('i', $uf);
-    $stmt->execute();
-    $users = $stmt->get_result();
-    if ($users->num_rows > 0) {
-        while($r = $users->fetch_assoc()) {
-            $descrip = $r["descrip"];
-        }
-    }
+    $conn = connect();
+    $descrip = getdescrip($conn,$uf);
 } else {
     $ok = false;
     header("Location: index.php");
@@ -46,7 +24,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
 ?>
 
 <?php if ($ok) { ?>
-<div id="wrap">
 <div class="container">
     <div class="jumbotron">
         <h1>Comandes</h1>
@@ -54,10 +31,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
     </div>
     <?php echo "<a class='btn btn-success btn-block' href='comanda_new.php?uf=".$uf."' >Comanda Actual</a>" ?>
     <?php echo "<a class='btn btn-primary btn-block' href='userlist.php?uf=".$uf."' >Històric Comandes</a>" ?>
-    <a class="btn btn-secondary btn-block" href="">Dades UC</a>
+    <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php?uf=".$uf."' >Dades UC</a>" ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>
-</div>
+
 <?php $conn->close(); ?>
 
 <?php } else {

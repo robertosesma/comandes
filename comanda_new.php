@@ -10,40 +10,16 @@
 </head>
 
 <body>
-
 <?php
+include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GET['uf']) || $_SERVER["REQUEST_METHOD"] == "POST")) {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf'])) {
     $uf = $_GET["uf"];
-    // the actual comanda is always the next tuesday
-    $fecha = date('Y-m-d',strtotime('next tuesday'));
-    // is there an open comanda?
-    $day = date("N");
-    $hour = date("H");
-    $open = (($day==2 and $hour>=10) or $day==3 or $day==4 or ($day==5 and $hour<=18));
-    $open = true;
+    $fecha = getnext();
+    $open = isopen();
 
-    // Create connection
-    $conn = new mysqli("localhost", "rsesma", "Amsesr.1977", "comandes");
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $conn->query("SET NAMES 'utf8'");
-    $conn->query("SET CHARACTER SET utf8");
-    $conn->query("SET SESSION collation_connection = 'utf8_unicode_ci'");
-
-    // get UC descrip
-    $stmt = $conn -> prepare('SELECT descrip FROM uf WHERE uf = ?');
-    $stmt->bind_param('i', $uf);
-    $stmt->execute();
-    $users = $stmt->get_result();
-    if ($users->num_rows > 0) {
-        while($r = $users->fetch_assoc()) {
-            $descrip = $r["descrip"];
-        }
-    }
+    $conn = connect();
+    $descrip = getdescrip($conn,$uf);
 
     // get UC comanda
     $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");
@@ -51,16 +27,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
     $stmt->execute();
     $com = $stmt->get_result();
 
-    // get total for UC and comanda
-    $stmt = $conn -> prepare("SELECT Sum(total) AS total FROM comanda WHERE uf = ? AND fecha = ? GROUP BY fecha, uf");
-    $stmt->bind_param('is', $uf, $fecha);
-    $stmt->execute();
-    $totals = $stmt->get_result();
-    if ($totals->num_rows > 0) {
-        while($r = $totals->fetch_assoc()) {
-            $uctotal = ($r["total"]==NULL ? '' : number_format($r["total"], 2, ",", ".")."€");
-        }
-    }
+    $uctotal = gettotal($conn,$uf,$fecha);
 } else {
     $ok = false;
     header("Location: index.php");
@@ -94,6 +61,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
                 <th><div class='text-center'>Quantitat</div></th>
                 <th><div class='text-right'>Preu</div></th>
                 <th><div class='text-right'>Total</div></th>
+                <?php if ($open) { ?><th><div class='text-right'></div></th><?php } ?>
             </tr>
         </thead>
         <tbody>
@@ -101,6 +69,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
             <?php
             $preu = ($row["precio"]==NULL ? '' : number_format($row["precio"], 2, ",", ".")."€");
             $tot = ($row["total"]==NULL ? '' : number_format($row["total"], 2, ",", ".")."€");
+            $del = 'delete.php?uf='.$uf.'&fecha='.$fecha.'&item='.$row["tipo"];
             ?>
             <tr>
                 <td><?php echo $row["dgrupo"]; ?></td>
@@ -108,6 +77,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && (isset($_GE
                 <td><div class='text-center'><?php echo $row["n"]; ?></div></td>
                 <td><div class='text-right'><?php echo $preu; ?></div></td>
                 <td><div class='text-right'><?php echo $tot; ?></div></td>
+                <?php echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td><tr>"; ?>
             </tr>
         <?php } ?>
         </tbody>

@@ -12,32 +12,14 @@
 <body>
 
 <?php
+include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && ((isset($_GET['uf']) && isset($_GET['fecha'])) || $_SERVER["REQUEST_METHOD"] == "POST")) {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf']) && isset($_GET['fecha'])) {
     $uf = $_GET["uf"];
     $fecha = $_GET["fecha"];
 
-    // Create connection
-    $conn = new mysqli("localhost", "rsesma", "Amsesr.1977", "comandes");
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    $conn->query("SET NAMES 'utf8'");
-    $conn->query("SET CHARACTER SET utf8");
-    $conn->query("SET SESSION collation_connection = 'utf8_unicode_ci'");
-
-    // get UC descrip
-    $stmt = $conn -> prepare('SELECT descrip FROM uf WHERE uf = ?');
-    $stmt->bind_param('i', $uf);
-    $stmt->execute();
-    $users = $stmt->get_result();
-    if ($users->num_rows > 0) {
-        while($r = $users->fetch_assoc()) {
-            $descrip = $r["descrip"];
-        }
-    }
+    $conn = connect();
+    $descrip = getdescrip($conn,$uf);
 
     // get UC comandes
     $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");
@@ -45,16 +27,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && ((isset($_G
     $stmt->execute();
     $com = $stmt->get_result();
 
-    // get total for UC
-    $stmt = $conn -> prepare("SELECT Sum(total) AS total FROM comanda WHERE uf = ? AND fecha = ? GROUP BY fecha, uf");
-    $stmt->bind_param('is', $uf, $fecha);
-    $stmt->execute();
-    $totals = $stmt->get_result();
-    if ($totals->num_rows > 0) {
-        while($r = $totals->fetch_assoc()) {
-            $uctotal = ($r["total"]==NULL ? '' : number_format($r["total"], 2, ",", ".")."€");
-        }
-    }
+    $uctotal = gettotal($conn,$uf,$fecha);
 } else {
     $ok = false;
     header("Location: index.php");
