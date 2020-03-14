@@ -14,8 +14,8 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf']) && isset($_GET['fecha'])) {
-    $uf = $_GET["uf"];
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username']) && isset($_GET['fecha'])) {
+    $uf = $_SESSION['username'];
     $fecha = $_GET["fecha"];
 
     $conn = connect();
@@ -36,13 +36,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
 
 <?php if ($ok) { ?>
 <div class="jumbotron" "jumbotron-fluid">
-    <?php $url = 'userlist.php?uf='.$uf; ?>
     <div class="container">
         <h1>Comanda <?php echo $fecha; ?></h1>
         <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
         <h3>Total: <?php echo $uctotal; ?></h3>
         <p>Aquest total no inclou alguns productes de preu variable</p>
-        <a class="btn btn-link" href=<?php echo $url; ?>>Tornar</a>
+        <a class="btn btn-link" href="userlist.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 </div>

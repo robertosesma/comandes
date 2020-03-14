@@ -1,10 +1,10 @@
 <?php
 session_start();
 include 'func_aux.php';
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
-    if (isset($_GET['uf']) && isset($_GET['fecha']) && isset($_GET['item'])) {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
+    if (isset($_GET['fecha']) && isset($_GET['item'])) {
+        $uf = $_SESSION['username'];
         $fecha = $_GET["fecha"];
-        $uf = $_GET["uf"];
         $item = $_GET["item"];
 
         $conn = connect();
@@ -27,3 +27,5 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         echo '<script>window.location.href = "comanda_new.php?uf='.$uf.'";</script>';
     }
 }
+exit();
+?>

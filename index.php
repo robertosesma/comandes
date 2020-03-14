@@ -35,11 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $users = $stmt->get_result();
         $nrows = $users->num_rows;
+        $_SESSION['loggedin'] = true;
+        $_SESSION['username']=$user;
         if ($nrows > 0) {
             while($r = $users->fetch_assoc()) {
-                if (password_verify($pswd, $r["psswd"])) {
-                    $_SESSION['loggedin'] = true;
-                    echo '<script>window.location.href = "init.php?uf='.$user.'";</script>';
+                 if (password_verify($pswd, $r["psswd"])) {
+                     $_SESSION['loggedin'] = true;
+                    $_SESSION['username']=$user;
+                    echo '<script>window.location.href = "init.php";</script>';
                 } else {
                     $pswdErr = "La contrassenya no és correcta";
                 }

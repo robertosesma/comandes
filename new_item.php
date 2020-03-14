@@ -21,11 +21,11 @@ include 'func_aux.php';
 $ok = true;
 $err = "";
 $error = false;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
+    $uf = $_SESSION['username'];
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $uf = clear_input($_POST["uf"]);
         $fecha = clear_input($_POST["fecha"]);
         if (empty($_POST["grupo"])) {
             $err = "El productor no pot quedar buit. S'han de tornar a introduir les dades.";
@@ -64,8 +64,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
     }
 
     // init the form
-    if ((isset($_GET['uf']) && isset($_GET['fecha'])) || $error) {
-        $uf = $_GET["uf"];
+    if (isset($_GET['fecha']) || $error) {
         $fecha = $_GET["fecha"];
 
         // get productors
@@ -138,7 +137,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
         </div>
         <input type="text" class="hidden_control" name="uf" value=" <?php echo $uf; ?> ">
         <input type="text" class="hidden_control" name="fecha" value=" <?php echo $fecha; ?> ">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
 </div>
 

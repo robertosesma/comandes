@@ -13,8 +13,8 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf'])) {
-    $uf = $_GET["uf"];
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
+    $uf = $_SESSION['username'];
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
 } else {
@@ -29,9 +29,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
         <h1>Comandes</h1>
         <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
     </div>
-    <?php echo "<a class='btn btn-success btn-block' href='comanda_new.php?uf=".$uf."' >Comanda Actual</a>" ?>
-    <?php echo "<a class='btn btn-primary btn-block' href='userlist.php?uf=".$uf."' >Històric Comandes</a>" ?>
-    <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php?uf=".$uf."' >Dades UC</a>" ?>
+    <?php echo "<a class='btn btn-success btn-block' href='comanda_new.php' >Comanda Actual</a>" ?>
+    <?php echo "<a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>" ?>
+    <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php' >Dades UC</a>" ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>
 

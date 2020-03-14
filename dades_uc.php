@@ -14,28 +14,48 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+$error = false;
+$pswdErr = "";
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
+    $uf = $_SESSION['username'];
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $uf = clear_input($_POST["uf"]);
         $descrip = clear_input($_POST["uc"]);
         $mail = clear_input($_POST["mail"]);
+        $pswdChange = false;
+        $pswd = clear_input($_POST["pswd1"]);
+        if (strlen($pswd)>=8) {
+            $pswdChange = true;
+            $password = password_hash($pswd, PASSWORD_DEFAULT);
+        } else {
+            if (strlen($pswd)>0) {
+                $error = true;
+                $pswdErr = "La contrasenya ha de tenir com a mínim 8 caràcters";
+            }
+        }
 
-        echo "uf = ".$uf." descrip = ".$descrip." mail = ".$mail;
+        if (!$error) {
+            if ($pswdChange) {
+                $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =? WHERE uf=?");
+                $stmt->bind_param('sssi', $descrip, $mail, $password, $uf);
+            } else {
+                $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=? WHERE uf=?");
+                $stmt->bind_param('ssi', $descrip, $mail, $uf);
+            }
+            $stmt->execute();
+            echo '<script language="javascript">alert("Dades actualitzades")</script>';
+        }
     }
 
-    if (isset($_GET['uf'])) {
-        $uf = $_GET["uf"];
-        $stmt = $conn -> prepare('SELECT * FROM uf WHERE uf = ?');
-        $stmt->bind_param('i', $uf);
-        $stmt->execute();
-        $user = $stmt->get_result();
-        if ($user->num_rows > 0) {
-            while($r = $user->fetch_assoc()) {
-                $descrip = $r["descrip"];
-                $mail = $r["email"];
-            }
+    $stmt = $conn -> prepare('SELECT * FROM uf WHERE uf = ?');
+    $stmt->bind_param('i', $uf);
+    $stmt->execute();
+    $user = $stmt->get_result();
+    if ($user->num_rows > 0) {
+        while($r = $user->fetch_assoc()) {
+            $descrip = $r["descrip"];
+            $mail = $r["email"];
         }
     }
 } else {
@@ -48,7 +68,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
 <div class="container">
     <div class="container p-3 my-3 border">
         <h2>Dades UC: <?php echo $descrip; ?></h2>
-        <a class="btn btn-link" href=<?php echo "init.php?uf=".$uf; ?>>Tornar</a>
+        <a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 
@@ -63,15 +83,18 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
             <input type="email" class="form-control" name="mail" id="mail" required  value=" <?php echo $mail; ?> ">
         </div>
         <div class="form-group">
-            <label for="pswd1">Contrasenya (8 caràcters):</label>
+            <label for="pswd1">Contrasenya (mínim 8 caràcters):</label>
             <input type="password" class="form-control" name="pswd1" id="up">
         </div>
         <div class="form-group">
-            <label for="pswd2">Confirna la contrasenya:</label>
+            <span class="error text-danger"><?php echo $pswdErr;?></span>
+        </div>
+        <div class="form-group">
+            <label for="pswd2">Confirma la contrasenya:</label>
             <input type="password" class="form-control" name="pswd2" id="up2">
         </div>
         <input type="text" class="form-control" hidden="true" name="uf" value=" <?php echo $uf; ?> ">
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
 </div>
 

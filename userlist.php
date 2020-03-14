@@ -13,8 +13,8 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf'])) {
-    $uf = $_GET["uf"];
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
+    $uf = $_SESSION['username'];
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
 
@@ -31,12 +31,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
 
 <?php if ($ok) { ?>
 <div class="container">
-    <?php $url = 'init.php?uf='.$uf; ?>
     <div class="jumbotron">
         <h1>Històric de Comandes</h1>
         <p>Cooperativa de Consum i Resistència Terrassa</p>
         <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
-        <a class="btn btn-link" href=<?php echo $url; ?>>Tornar</a>
+        <a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 
@@ -44,7 +43,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
         <tbody>
         <?php while ($row = mysqli_fetch_array($com)) {
             $fecha = $row["fecha"];
-            $url = 'comanda.php?uf='.$uf.'&fecha='.$fecha; ?>
+            $url = 'comanda.php?&fecha='.$fecha; ?>
             <tr>
                 <td><?php echo "<a href='".$url."'>".$fecha."</a>"; ?></td>
             </tr>

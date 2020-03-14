@@ -13,8 +13,8 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET['uf'])) {
-    $uf = $_GET["uf"];
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
+    $uf = $_SESSION['username'];
     $fecha = getnext();
     $open = isopen();
 
@@ -44,10 +44,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
         <p>Aquest total no inclou alguns productes de preu variable</p>
         <?php if (!$open) {
             echo "<h2 class='text-warning'>Comanda tancada</h2>";
+            echo '<a class="btn btn-link" href="export.php">Exportar</a>';
         } else {
-            echo "<a class='btn btn-link' href='new_item.php?uf=".$uf."&fecha=".$fecha."'>Afegir producte</a>";
+            echo "<a class='btn btn-link' href='new_item.php?&fecha=".$fecha."'>Afegir producte</a>";
         }?>
-        <a class="btn btn-link" href=<?php echo "init.php?uf=".$uf; ?>>Tornar</a>
+        <a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 </div>
@@ -69,7 +70,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
             <?php
             $preu = ($row["precio"]==NULL ? '' : number_format($row["precio"], 2, ",", ".")."€");
             $tot = ($row["total"]==NULL ? '' : number_format($row["total"], 2, ",", ".")."€");
-            $del = 'delete.php?uf='.$uf.'&fecha='.$fecha.'&item='.$row["tipo"];
+            $del = 'delete.php?&fecha='.$fecha.'&item='.$row["tipo"];
             ?>
             <tr>
                 <td><?php echo $row["dgrupo"]; ?></td>
@@ -77,7 +78,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_GET
                 <td><div class='text-center'><?php echo $row["n"]; ?></div></td>
                 <td><div class='text-right'><?php echo $preu; ?></div></td>
                 <td><div class='text-right'><?php echo $tot; ?></div></td>
-                <?php echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td><tr>"; ?>
+                <?php if ($open) { echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td><tr>"; } ?>
             </tr>
         <?php } ?>
         </tbody>

@@ -1,7 +1,8 @@
 <?php
 function connect(){
-    $config = parse_ini_file('db.ini');
-    $con = mysqli_connect("localhost",$config['username'],$config['password'],$config['db']);
+    require_once 'dbconfig.php';
+
+    $con = mysqli_connect($dbconfig['server'],$dbconfig['username'],$dbconfig['password'],$dbconfig['db']);
     if(!$con){
         die("Failed to connect to Database");
     }
@@ -51,21 +52,24 @@ function isopen(){
     $hour = date("H");
 
     $open = false;
-    $config = parse_ini_file('open.ini');
-    if (($day >= $config['dini']) && ($day <= $config['dend'])) {
+    $next=getnext();
+    $dini=2;
+    $dend=5;
+    $hini=10;
+    $hend=17;
+    if (($day >= $dini) && ($day <= $dend)) {
         $open = true;
-        if ((($day == $config['dini']) && ($hour < $config['hini'])) ||
-            (($day == $config['dend']) && ($hour > $config['hend']))) {
+        if ((($day == $dini) && ($hour < $hini)) ||
+            (($day == $dend) && ($hour > $hend))) {
             $open = false;
         }
     }
+    $open=false;
     return $open;
 }
 
 function getnext(){
-    $config = parse_ini_file('open.ini');
-    $fecha = date('Y-m-d',strtotime($config['next']));
-    return $fecha;
+    return date('Y-m-d',strtotime("next tuesday"));
 }
 
 ?>
