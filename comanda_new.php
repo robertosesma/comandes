@@ -44,7 +44,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <p>Aquest total no inclou alguns productes de preu variable</p>
         <?php if (!$open) {
             echo "<h2 class='text-warning'>Comanda tancada</h2>";
-            echo '<a class="btn btn-link" href="export.php">Exportar</a>';
+            //echo "<a class='btn btn-link' href='resum.php?fecha=".$fecha."'>Resum</a>";
         } else {
             echo "<a class='btn btn-link' href='new_item.php?&fecha=".$fecha."'>Afegir producte</a>";
         }?>

@@ -31,6 +31,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     </div>
     <?php echo "<a class='btn btn-success btn-block' href='comanda_new.php' >Comanda Actual</a>" ?>
     <?php echo "<a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>" ?>
+    <?php echo "<a class='btn btn-primary btn-block' href='resumlist.php' >Resum i Llistats</a>" ?>
     <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php' >Dades UC</a>" ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>

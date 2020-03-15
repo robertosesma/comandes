@@ -35,7 +35,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 ?>
 
 <?php if ($ok) { ?>
-<div class="jumbotron" "jumbotron-fluid">
+<div class="jumbotron">
     <div class="container">
         <h1>Comanda <?php echo $fecha; ?></h1>
         <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>

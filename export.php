@@ -1,13 +1,11 @@
 <?php
-require 'vendor/autoload.php';
+header("Content-Type: application/csv");
+header("Content-Disposition: attachment; filename=ejemplo.csv");
+header("Pragma: no-cache");
+header("Expires: 0");
 
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+echo "V1;V2\n";
 
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
-$sheet->setCellValue('A1', 'Hello World !');
+print("1;2\n");
 
-$writer = new Xlsx($spreadsheet);
-$writer->save('hello world.xlsx');
 ?>
