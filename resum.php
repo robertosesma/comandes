@@ -32,6 +32,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <div class="container">
     <div class="container p-3 my-3 border">
         <h1>Comanda <?php echo $fecha; ?></h1>
+        <h3>Resum per prodcute</h3>
         <p>Els totals no inclouen alguns productes de preu variable</p>
         <a class="btn btn-link" href="resumlist.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>

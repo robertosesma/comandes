@@ -47,6 +47,19 @@ function gettotal($conn,$uf,$fecha){
     return $uctotal;
 }
 
+function getsubtotal($conn,$uf,$fecha,$grupo){
+    $stmt = $conn -> prepare("SELECT SUM(total) AS subtotal FROM comanda WHERE fecha =? AND uf=? AND cgrupo=?");
+    $stmt->bind_param('sii', $fecha, $uf, $grupo);
+    $stmt->execute();
+    $totals = $stmt->get_result();
+    if ($totals->num_rows > 0) {
+        while($r = $totals->fetch_assoc()) {
+            $subtotal = ($r["subtotal"]==NULL ? '' : number_format($r["subtotal"], 2, ",", ".")."€");
+        }
+    }
+    return $subtotal;
+}
+
 function isopen(){
     $day = date("N");
     $hour = date("H");
@@ -64,7 +77,6 @@ function isopen(){
             $open = false;
         }
     }
-    $open=false;
     return $open;
 }
 
