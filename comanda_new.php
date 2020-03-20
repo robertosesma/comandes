@@ -52,7 +52,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 </div>
 
 <?php
-    include 'comanda_tbl.php'; 
+    include 'comanda_tbl.php';
 
     $conn->close();
 } else {

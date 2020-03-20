@@ -65,11 +65,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
     // init the form
     if (isset($_GET['fecha']) || $error) {
-        $fecha = $_GET["fecha"];
+        $fecha = clear_input($_GET["fecha"]);
 
         // get productors
         $stmt = $conn -> prepare("SELECT dtipo.grupo, dgrupo.descrip
                                 FROM dgrupo RIGHT JOIN dtipo ON dgrupo.cod = dtipo.grupo
+                                WHERE dgrupo.activado = 1
                                 GROUP BY dtipo.grupo, dgrupo.descrip
                                 ORDER BY dtipo.grupo;");
         $stmt->execute();
@@ -82,7 +83,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $g = $r["grupo"];
             $stmt = $conn -> prepare("SELECT dtipo.tipo, dtipo.descrip
                             FROM dtipo
-                            WHERE (dtipo.grupo = ?)
+                            WHERE (dtipo.grupo = ? AND dtipo.desactivado = 0)
                             ORDER BY dtipo.tipo");
             $stmt->bind_param('i', $g);
             $stmt->execute();

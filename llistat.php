@@ -1,20 +1,18 @@
-<?php session_start(); ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Llistat</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-</head>
-
-<body>
-
 <?php
+session_start();
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+
+require 'vendor/autoload.php';
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 include 'func_aux.php';
-$ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username']) && isset($_GET['fecha'])) {
+
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
+    && isset($_SESSION['username']) && isset($_GET['fecha'])) {
     $fecha = $_GET["fecha"];
     $conn = connect();
 
@@ -25,105 +23,124 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $ucs = $stmt->get_result();
     $nuc = $ucs->num_rows;
 
-    // get productors
-    $stmt = $conn -> prepare("SELECT cod, descrip FROM dgrupo");
-    $stmt->execute();
-    $prods = $stmt->get_result();
-} else {
-    $ok = false;
-    header("Location: index.php");
-}
-?>
+    $spreadsheet = new Spreadsheet();
+    // Set document properties
+    $spreadsheet->getProperties()->setCreator('la coope')
+        ->setTitle('Llistat comanda '.$fecha)
+        ->setDescription('Llistat per Unitat de Convivència');
+    // Rename worksheet
+    $spreadsheet->getActiveSheet()->setTitle('Llistat');
+    // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+    $spreadsheet->setActiveSheetIndex(0);
 
-<?php if ($ok) { ?>
-<div class="container">
-    <div class="container p-3 my-3 border">
-        <h1>Comanda <?php echo $fecha; ?></h1>
-        <h3>Llistat per Unitat de Convivència</h3>
-        <h4><?php echo $nuc; ?> participants</h4>
-        <p>Els totals no inclouen alguns productes de preu variable</p>
-        <a class="btn btn-link" href="resumlist.php">Tornar</a>
-        <a class="btn btn-link" href="logout.php">Sortir</a>
-    </div>
-</div>
+    // Title
+    $spreadsheet->getActiveSheet()
+        ->setCellValue('A1', 'Comanda '.$fecha)
+        ->setCellValue('A2', 'Unitats de Convivència: '.$nuc);
 
-<div class="container">
-    <?php
+    // custom style with different bold and size
+    $sHeader = array(
+    'font'  => array(
+        'bold' => true,
+        'size'  => 14,
+    ));
+    $sUC = array(
+    'font'  => array(
+        'bold' => true,
+        'size'  => 12,
+    ));
+    $spreadsheet->getActiveSheet()->getStyle('A1:D2')->applyFromArray($sHeader);
+    $spreadsheet->getActiveSheet()->mergeCells('A1:D1');
+    $spreadsheet->getActiveSheet()->mergeCells('A2:D2');
+
     $count = 1;
+    $row = 4;
     while ($r = mysqli_fetch_array($ucs)) {
         $uf = $r["uf"];
         $uctotal = gettotal($conn,$uf,$fecha);
-        echo "<h4>".$count.". ".$r["descrip"].": ".$uctotal."</h4>";
+
+        $spreadsheet->getActiveSheet()->setCellValue('A'.$row, $count.'. '.$r["descrip"].': '.$uctotal);
+        $spreadsheet->getActiveSheet()->getStyle('A'.$row.':D'.$row)->applyFromArray($sUC);
+        $spreadsheet->getActiveSheet()->mergeCells('A'.$row.':D'.$row);
+
+        $row++;
+        $spreadsheet->getActiveSheet()
+            ->setCellValue('A'.$row, "Productor")
+            ->setCellValue('B'.$row, "Producte")
+            ->setCellValue('C'.$row, "Quantitat")
+            ->setCellValue('D'.$row, "Preu")
+            ->setCellValue('E'.$row, "Total");
+        $spreadsheet->getActiveSheet()->getStyle('A'.$row.':E'.$row)->getFont()->setBold(true);
+        $spreadsheet->getActiveSheet()->getStyle('A'.$row.':E'.$row)
+            ->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
+        $row++;
 
         $stmt = $conn -> prepare("SELECT * FROM comanda WHERE fecha =? AND uf=?");
         $stmt->bind_param('si', $fecha, $uf);
         $stmt->execute();
         $items = $stmt->get_result();
         $nitems = $items->num_rows;
-        $j = 1; ?>
-        <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered">
-            <thead class="thead-light">
-                <tr>
-                    <th>Productor</th>
-                    <th>Producte</th>
-                    <th><div class='text-center'>Quantitat</div></th>
-                    <th><div class='text-right'>Preu</div></th>
-                    <th><div class='text-right'>Total</div></th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php
-            $g0 = 0;
-            while ($i = mysqli_fetch_array($items)) {
-                $g = $i["cgrupo"];
-                if (($g <> $g0 && $g0>0)) {
-                    $subtotal = getsubtotal($conn,$uf,$fecha,$g0);?>
-                    <tr>
-                        <td> </td>
-                        <td> </td>
-                        <td> </div></td>
-                        <td><div class='text-right'>Subtotal</div></td>
-                        <td><div class='text-right font-weight-bold'><?php echo $subtotal; ?></div></td>
-                    </tr>
-                <?php }
-                $g0 = $g;
+        $g0 = 0;
+        while ($i = mysqli_fetch_array($items)) {
+            if ($g0>0 && $g0<>$i["cgrupo"]) {
+                $subtotal = getsubtotal($conn,$uf,$fecha,$g0);
+                $spreadsheet->getActiveSheet()
+                    ->setCellValue('D'.$row, "SubTotal")
+                    ->setCellValue('E'.$row, $subtotal);
+                $spreadsheet->getActiveSheet()->getStyle('D'.$row)->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getNumberFormat()
+                    ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
+                $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getFont()->setBold(true);
+                $row++;
+            }
+            $g0 = $i["cgrupo"];
 
-                $preu = ($i["precio"]==NULL ? '' : number_format($i["precio"], 2, ",", ".")."€");
-                $tot = ($i["total"]==NULL ? '' : number_format($i["total"], 2, ",", ".")."€"); ?>
-                <tr>
-                    <td><?php echo $i["dgrupo"]; ?></td>
-                    <td><?php echo $i["item"]; ?></td>
-                    <td><div class='text-center'><?php echo $i["n"]; ?></div></td>
-                    <td><div class='text-right'><?php echo $preu; ?></div></td>
-                    <td><div class='text-right'><?php echo $tot; ?></div></td>
-                </tr>
-            <?php
-            if ($j == $nitems) {
-                $subtotal = getsubtotal($conn,$uf,$fecha,$g); ?>
-                <tr>
-                    <td> </td>
-                    <td> </td>
-                    <td> </div></td>
-                    <td><div class='text-right'>Subtotal</div></td>
-                    <td><div class='text-right font-weight-bold'><?php echo $subtotal; ?></div></td>
-                </tr>
-            <?php }
-                $j = $j + 1;
-            } ?>
-            </tbody>
-        </table>
+            $preu = ($i["precio"]==NULL ? '' : $i["precio"]);
+            $tot = ($i["total"]==NULL ? '' : $i["total"]);
+            $spreadsheet->getActiveSheet()
+                ->setCellValue('A'.$row, $i["dgrupo"])
+                ->setCellValue('B'.$row, $i["item"])
+                ->setCellValue('C'.$row, $i["n"])
+                ->setCellValue('D'.$row, $preu)
+                ->setCellValue('E'.$row, $tot);
+            $spreadsheet->getActiveSheet()
+                    ->getStyle('D'.$row.':E'.$row)->getNumberFormat()
+                    ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
 
-        <?php
-        $count = $count + 1;
-    } ?>
-</div>
+            $row++;
+        }
+        // insert last SubTotal
+        $subtotal = getsubtotal($conn,$uf,$fecha,$g0);
+        $spreadsheet->getActiveSheet()
+            ->setCellValue('D'.$row, "SubTotal")
+            ->setCellValue('E'.$row, $subtotal);
+        $spreadsheet->getActiveSheet()->getStyle('D'.$row)->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getNumberFormat()
+            ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
+        $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getFont()->setBold(true);
 
+        $count++;
+        $row = $row + 2;
+    }
+    $spreadsheet->getActiveSheet()->getColumnDimension('A')->SetAutoSize(true);
+    $spreadsheet->getActiveSheet()->getColumnDimension('B')->SetAutoSize(true);
+    $spreadsheet->getActiveSheet()->calculateColumnWidths();
 
-<?php
-    $conn->close();
-} else {
-    header("Location: index.php");
-}?>
+    // print configuration
+    $spreadsheet->getActiveSheet()->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
+    $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1);
+    $spreadsheet->getActiveSheet()->getPageMargins()->setRight(1);
+    $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(1);
+    $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(1);
 
-</body>
-</html>
+    // Create Excel file and download
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="Comanda_'.$fecha.'.xls"');
+    header('Cache-Control: max-age=0');
+    $writer = IOFactory::createWriter($spreadsheet, 'Xls');
+    $writer->save('php://output');
+}
+exit();
+?>

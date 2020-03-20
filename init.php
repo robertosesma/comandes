@@ -17,6 +17,20 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uf = $_SESSION['username'];
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
+
+    $stmt = $conn -> prepare('SELECT * FROM dgrupo WHERE uf = ?');
+    $stmt->bind_param('i', $uf);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $nrows = $res->num_rows;
+    $grupo = false;
+    if ($nrows>0) {
+        $grupo = true;
+        while($r = $res->fetch_assoc()) {
+            $dgrupo = $r["descrip"];
+            $grupo = $r["cod"];
+        }
+    }
 } else {
     $ok = false;
     header("Location: index.php");
@@ -33,6 +47,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <?php echo "<a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>" ?>
     <?php echo "<a class='btn btn-primary btn-block' href='resumlist.php' >Resum i Llistats</a>" ?>
     <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php' >Dades UC</a>" ?>
+    <?php if ($grupo){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?grupo=".$grupo."' >Editar productes</a>"; } ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>
 

@@ -47,14 +47,19 @@ function gettotal($conn,$uf,$fecha){
     return $uctotal;
 }
 
-function getsubtotal($conn,$uf,$fecha,$grupo){
+function getsubtotal($conn,$uf,$fecha,$grupo,$format){
     $stmt = $conn -> prepare("SELECT SUM(total) AS subtotal FROM comanda WHERE fecha =? AND uf=? AND cgrupo=?");
     $stmt->bind_param('sii', $fecha, $uf, $grupo);
     $stmt->execute();
     $totals = $stmt->get_result();
     if ($totals->num_rows > 0) {
         while($r = $totals->fetch_assoc()) {
-            $subtotal = ($r["subtotal"]==NULL ? '' : number_format($r["subtotal"], 2, ",", ".")."€");
+            if ($format) {
+                $subtotal = ($r["subtotal"]==NULL ? '' : number_format($r["subtotal"], 2, ",", ".")."€");
+            } else {
+                $subtotal = ($r["subtotal"]==NULL ? '' : $r["subtotal"]);
+            }
+
         }
     }
     return $subtotal;
@@ -82,6 +87,19 @@ function isopen(){
 
 function getnext(){
     return date('Y-m-d',strtotime("next tuesday"));
+}
+
+function getnextitem($conn){
+    $next = '';
+    $stmt = $conn -> prepare("SELECT MAX(tipo) AS max FROM dtipo;");
+    $stmt->execute();
+    $max = $stmt->get_result();
+    if ($max->num_rows > 0) {
+        while($r = $max->fetch_assoc()) {
+            $next = $r["max"]+1;
+        }
+    }
+    return $next;
 }
 
 ?>

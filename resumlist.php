@@ -38,15 +38,28 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered" id="comandes">
         <tbody>
         <?php while ($row = mysqli_fetch_array($com)) {
+            // data actual
+            $today_dt = new DateTime(date("Y-m-d"));
+            // data de la comanda
             $fecha = $row["fecha"];
-            $resum = 'resum.php?&fecha='.$fecha;
-            $detall = 'llistat.php?&fecha='.$fecha; ?>
-            <tr>
-                <td><?php echo $fecha; ?></td>
-                <td><?php echo "<a href='".$resum."'>Resum</a>"; ?></td>
-                <td><?php echo "<a href='".$detall."'>Llistat</a>"; ?></td>
-            </tr>
-        <?php } ?>
+            $fecha_dt = new DateTime($fecha);
+            // dissabte previ a la comanda
+            $sat_dt = new DateTime($fecha);
+            $sat_dt->sub(new DateInterval('P3D'));
+            // la comanda surt al llistat si és anterior a la data actual o
+            // si la data actual es posterior o igual al dissabte previ a la comanda
+            if (($fecha_dt < $today_dt) || ($today_dt < $fecha_dt && $today_dt >= $sat_dt)) {
+                $resum = 'resum.php?&fecha='.$fecha;
+                $detall = 'llistat.php?&fecha='.$fecha;
+                $pa = 'pa.php?&fecha='.$fecha; ?>
+                <tr>
+                    <td><?php echo $fecha; ?></td>
+                    <td><?php echo "<a href='".$resum."'>Resum</a>"; ?></td>
+                    <td><?php echo "<a href='".$detall."'>Llistat</a>"; ?></td>
+                    <td><?php echo "<a href='".$pa."'>Llistat PA</a>"; ?></td>
+                </tr>
+        <?php }
+        } ?>
         </tbody>
     </tbody>
     </table>
