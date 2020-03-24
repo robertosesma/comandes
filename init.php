@@ -18,22 +18,32 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
 
+    // es l'usuari administrador?
+    $stmt = $conn -> prepare('SELECT * FROM uf WHERE uf = ?');
+    $stmt->bind_param('i', $uf);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($r = $res->fetch_assoc()) {
+        $_SESSION["admin"] = $r["admin"];
+    }
+    $res->free();
+
+    // es contacte de productor?
     $stmt = $conn -> prepare('SELECT * FROM dgrupo WHERE uf = ?');
     $stmt->bind_param('i', $uf);
     $stmt->execute();
     $res = $stmt->get_result();
     $nrows = $res->num_rows;
-    $grupo = false;
+    $_SESSION["contacte"] = 0;
     if ($nrows>0) {
-        $grupo = true;
-        while($r = $res->fetch_assoc()) {
-            $dgrupo = $r["descrip"];
-            $grupo = $r["cod"];
+        $_SESSION["contacte"] = 1;
+        while ($r = $res->fetch_assoc()) {
+            $prod = $r["cod"];
         }
     }
+    $res->free();
 } else {
     $ok = false;
-    header("Location: index.php");
 }
 ?>
 
@@ -41,20 +51,22 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <div class="container">
     <div class="jumbotron">
         <h1>Comandes</h1>
-        <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
+        <h2>UC: <?php echo $descrip; ?></h2>
     </div>
-    <?php echo "<a class='btn btn-success btn-block' href='comanda_new.php' >Comanda Actual</a>" ?>
-    <?php echo "<a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>" ?>
-    <?php echo "<a class='btn btn-primary btn-block' href='resumlist.php' >Resum i Llistats</a>" ?>
-    <?php echo "<a class='btn btn-secondary btn-block' href='dades_uc.php' >Dades UC</a>" ?>
-    <?php if ($grupo){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?grupo=".$grupo."' >Editar productes</a>"; } ?>
+    <a class='btn btn-success btn-block' href='comanda_new.php' >Comanda Actual</a>
+    <a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>
+    <a class='btn btn-primary btn-block' href='resumlist.php' >Resum i Llistats</a>
+    <?php if ($_SESSION["admin"]==0){ echo "<a class='btn btn-secondary btn-block' href='edit_uc.php' >Dades UC</a>"; } ?>
+    <?php if ($_SESSION["contacte"]==1){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?prod=".$prod."' >Editar productes</a>"; } ?>
+    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_uc.php'>Administrar UC</a>"; } ?>
+    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_prods.php'>Administrar Productores</a>"; } ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>
 
 <?php $conn->close(); ?>
 
 <?php } else {
-    header("Location: index.php");
+    header("Location: logout.php");
 }?>
 
 </body>

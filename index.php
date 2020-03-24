@@ -19,14 +19,14 @@ $user = $pswd = "";
 $conn = connect();
 
 // get UF data for UF drop-down
-$stmt = $conn -> prepare('SELECT * FROM uf');
+$stmt = $conn -> prepare('SELECT * FROM uf WHERE act=1 ORDER BY descrip');
 $stmt->execute();
 $duf = $stmt->get_result();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user = clear_input($_POST["uf"]);
     if (empty($_POST["pswd"])) {
-        $pswdErr = "La contraseña es necesaria";
+        $pswdErr = "Indicar una contrasenya";
     } else {
         $pswd = clear_input($_POST["pswd"]);
 
@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['username']=$user;
                     echo '<script>window.location.href = "init.php";</script>';
                 } else {
-                    $pswdErr = "La contrassenya no és correcta";
+                    $pswdErr = "La contrasenya no és correcta";
                 }
             }
         }

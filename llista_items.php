@@ -14,32 +14,33 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username']) && isset($_GET['grupo'])) {
-    $grupo = clear_input($_GET["grupo"]);
+if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])
+    && isset($_GET['prod']) && isset($_SESSION['contacte']) && $_SESSION['contacte'] == 1) {
     $conn = connect();
 
-    // get descrip from productor
+    // obtenim les dades del productor
+    $prod = clear_input($_GET["prod"]);
     $stmt = $conn -> prepare("SELECT * FROM dgrupo WHERE cod = ?");
-    $stmt->bind_param('i', $grupo);
+    $stmt->bind_param('i', $prod);
     $stmt->execute();
-    $tipo = $stmt->get_result();
-    $nrows = $tipo->num_rows;
+    $dades = $stmt->get_result();
+    $nrows = $dades->num_rows;
     if ($nrows > 0) {
-        while($t = $tipo->fetch_assoc()) {
-            $descrip = $t["descrip"];
-            $activado = $t["activado"];
+        while($r = $dades->fetch_assoc()) {
+            $descrip = $r["descrip"];
+            $activado = $r["activado"];
         }
-
+        // obtenirm els productes del productor
         $stmt = $conn -> prepare("SELECT * FROM dtipo WHERE grupo = ?");
-        $stmt->bind_param('i', $grupo);
+        $stmt->bind_param('i', $prod);
         $stmt->execute();
-        $prods = $stmt->get_result();
+        $items = $stmt->get_result();
     } else {
         $ok = false;
     }
+    $dades->free();
 } else {
     $ok = false;
-    header("Location: index.php");
 }
 ?>
 
@@ -47,14 +48,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <div class="container">
     <div class="container p-3 my-3 border">
         <h1>Llistat de productes</h1>
-        <h3>Productor: <?php echo $descrip; ?></h3>
+        <h3>Productora: <?php echo $descrip; ?></h3>
         <p><?php if ($activado) {
-            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$grupo.'&act=0">Desactivar</a>';
+            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$prod.'&act=0">Desactivar productora</a>';
         } else {
-            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$grupo.'&act=1">Activar</a>';
-        }?>
-        <?php echo '<a class="btn btn-link" href="nom_prod.php?grupo='.$grupo.'">Canviar nom</a>'; ?>
-        <?php echo '<a class="btn btn-link" href="edit_item.php?grupo='.$grupo.'&item=0&add=1">Afegir producte</a>'; ?>
+            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$prod.'&act=1">Activar productora</a>';
+        }
+        echo '<a class="btn btn-link" href="edit_item.php?grupo='.$grupo.'&add=1">Afegir producte</a>'; ?></p>
         <p><a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>
@@ -67,36 +67,26 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 <th>Producte</th>
                 <th><div class='text-right'>Preu</div></th>
                 <?php if ($grupo==4) { ?><th><div class='text-center'>Fila</div></th><?php } ?>
-                <th> </th>
-                <th> </th>
             </tr>
         </thead>
-        <?php while ($row = mysqli_fetch_array($prods)) {
-            $preu = ($row["precio"]==NULL ? '' : number_format($row["precio"], 2, ",", ".")."€");
-            if ($row["desactivado"]==0) {
+        <?php while ($i = mysqli_fetch_array($items)) {
+            if ($i["desactivado"]==0) {
                 echo "<tr>";
             } else {
                 echo "<tr class=table-secondary>";
-            } ?>
-                <td><?php echo $row["descrip"]; ?></td>
-                <td><div class='text-right'><?php echo $preu; ?></div></td>
-                <?php if ($grupo == 4) { echo "<td><div class='text-center'>".$row["fila"]."</div></td>"; } ?>
-                <?php echo "<td><a href='edit_item.php?&grupo=".$grupo."&item=".$row["tipo"]."&add=0'>Editar</a></td>"; ?>
-                <?php
-                if ($row["desactivado"]==0) {
-                    echo "<td><a href='toggle_item.php?&grupo=".$grupo."&item=".$row["tipo"]."&desact=1'>Desactivar</a></td>";
-                } else {
-                    echo "<td><a href='toggle_item.php?&grupo=".$grupo."&item=".$row["tipo"]."&desact=0'>Activar</a></td>";
-                } ?>
-            </tr>
-        <?php } ?>
+            }
+            echo '<td><a class="btn btn-link" href="edit_item.php?prod='.$prod.'&item='.$i["tipo"].'&add=0">'.$i["descrip"]."</td>";
+            echo '<td><div class="text-right">'.getascurr($i["precio"],"€").'</div></td>';
+            if ($prod == 4) { echo '<td><div class="text-center">'.$i["fila"].'</div></td>'; }
+            echo "</tr>";
+        } ?>
     </table>
 </div>
 
 <?php
     $conn->close();
 } else {
-    header("Location: index.php");
+    header("Location: logout.php");
 }?>
 
 </body>

@@ -102,4 +102,47 @@ function getnextitem($conn){
     return $next;
 }
 
+function getnextuf($conn){
+    $next = '';
+    $stmt = $conn -> prepare("SELECT MAX(uf) AS max FROM uf;");
+    $stmt->execute();
+    $max = $stmt->get_result();
+    if ($max->num_rows > 0) {
+        while($r = $max->fetch_assoc()) {
+            $next = $r["max"]+1;
+        }
+    }
+    return $next;
+}
+
+function getnextprod($conn){
+    $next = '';
+    $stmt = $conn -> prepare("SELECT MAX(cod) AS max FROM dgrupo;");
+    $stmt->execute();
+    $max = $stmt->get_result();
+    if ($max->num_rows > 0) {
+        while($r = $max->fetch_assoc()) {
+            $next = $r["max"]+1;
+        }
+    }
+    return $next;
+}
+
+function generatepswd($length){
+    // create new pasword
+    // symbols to use
+    $symbols = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890._';
+    $symbols_length = strlen($symbols) - 1;        //strlen starts from 0 so to get number of characters deduct 1
+    $pswd = '';
+    for ($i = 0; $i < $length; $i++) {
+        $n = rand(0, $symbols_length);      // get a random character from the string with all characters
+        $pswd .= $symbols[$n];              // add the character to the password string
+    }
+    return $pswd;
+}
+
+function getascurr($v,$currency){
+    return ($v==NULL ? '' : number_format($v, 2, ",", ".").$currency);
+}
+
 ?>
