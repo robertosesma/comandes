@@ -14,110 +14,110 @@
 <?php
 include 'func_aux.php';
 $ok = true;
-$error = false;
-$pswdErr = "";
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $grupo = clear_input($_POST["grupo"]);
-        $item = clear_input($_POST["item"]);
+        $prod = clear_input($_POST["prod"]);
         $add = clear_input($_POST["add"]);
         $descrip = clear_input($_POST["descrip"]);
         $preu = clear_input($_POST["preu"]);
-        if ($grupo==4) {
-            $fila = clear_input($_POST["fila"]);
-        } else {
-            $fila = NULL;
-        }
-
+        $preu = (strlen($preu)>0 ? str_replace(",",".",$preu) : NULL);
+        $desactivado = clear_input($_POST["desact"]=="desactivado");
+        $desactivado = ($desactivado == 1 ? 1 : 0);
+        // la Fleca Roca - PA (4) té fila en el excel del productor
+        $fila = ($grupo==4 ? clear_input($_POST["fila"]) : NULL);
         if ($add==0) {
-            // editar un registro ya existente
-            if ($grupo==4) {
-                // el tipo 4 (Fleca Roca - PA) tiene número de fila en el excel del productor
-                $stmt = $conn -> prepare("UPDATE dtipo SET descrip=?, precio=?, fila=? WHERE tipo=?");
-                $stmt->bind_param('sdii', $descrip, str_replace(",",".",$preu), $fila, $item);
-            } else {
-                $stmt = $conn -> prepare("UPDATE dtipo SET descrip=?, precio=? WHERE tipo=?");
-                $stmt->bind_param('sdi', $descrip, str_replace(",",".",$preu), $item);
-            }
+            // editar un registre ja existent
+            $item = clear_input($_POST["item"]);
+            $stmt = $conn -> prepare("UPDATE dtipo SET descrip=?, precio=?, fila=?, desactivado=? WHERE tipo=?");
+            $stmt->bind_param('sdiii', $descrip, $preu, $fila, $desactivado, $item);
         } else {
-            // crear un registro nuevo
-            // obtener el siguiente tipo: max + 1
-            $next = getnextitem($conn);
-            $stmt = $conn -> prepare("INSERT INTO dtipo (tipo, descrip, precio, grupo, fila) VALUES (?,?,?,?,?)");
-            $stmt->bind_param('isdii', $next, $descrip, str_replace(",",".",$preu), $grupo, $fila);
+            // afegir un item nou
+            $item = getnextitem($conn);
+            $stmt = $conn -> prepare("INSERT INTO dtipo (tipo, descrip, precio, grupo, fila, desactivado) VALUES (?,?,?,?,?,?)");
+            $stmt->bind_param('isdiii', $item, $descrip, $preu, $prod, $fila, $desactivado);
         }
         $stmt->execute();
-        echo '<script>window.location.href = "llista_items.php?grupo='.$grupo.'";</script>';
-    }
+        echo '<script>window.location.href = "llista_items.php?prod='.$prod.'";</script>';
+    } else {
+        if (isset($_GET['prod']) && isset($_GET['add'])) {
+            $prod = clear_input($_GET['prod']);
+            $add = clear_input($_GET['add']);
 
-    if (isset($_GET['grupo']) && isset($_GET['item']) && isset($_GET['add'])) {
-        $grupo = clear_input($_GET['grupo']);
-        $item = clear_input($_GET['item']);
-        $add = clear_input($_GET['add']);
-
-        if ($add==0) {
-            $stmt = $conn -> prepare("SELECT * FROM dtipo WHERE tipo = ?");
-            $stmt->bind_param('i', $item);
-            $stmt->execute();
-            $prod = $stmt->get_result();
-            $nrows = $prod->num_rows;
-            if ($nrows > 0) {
-                while($p = $prod->fetch_assoc()) {
-                    $descrip = $p["descrip"];
-                    $preu = $p["precio"];
-                    $fila = $p["fila"];
+            if ($add==0) {
+                $item = clear_input($_GET['item']);
+                $stmt = $conn -> prepare("SELECT * FROM dtipo WHERE tipo = ?");
+                $stmt->bind_param('i', $item);
+                $stmt->execute();
+                $dades = $stmt->get_result();
+                $nrows = $dades->num_rows;
+                if ($nrows > 0) {
+                    while($r = $dades->fetch_assoc()) {
+                        $descrip = $r["descrip"];
+                        $preu = $r["precio"];
+                        $fila = $r["fila"];
+                        $desactivado = $r["desactivado"];
+                    }
+                } else {
+                    $ok = false;
                 }
+                $dades->free();
             } else {
-                $ok = false;
+                $descrip = '';
+                $preu = '';
+                $fila = '';
+                $desactivado = 0;
             }
         } else {
-            $descrip = '';
-            $preu = '';
-            $fila = '';
+            $ok = false;
         }
     }
 } else {
     $ok = false;
-    header("Location: index.php");
 }
 ?>
 
 <?php if ($ok) { ?>
-<div class="container">
-    <div class="container p-3 my-3 border">
-        <h2><?php if ($add==0) {echo "Editar"; } else {echo "Afegir";} ?> producte</h2>
-        <a class="btn btn-link" href=<?php echo "llista_items.php?grupo=".$grupo; ?>>Tornar</a>
-        <a class="btn btn-link" href="logout.php">Sortir</a>
-    </div>
+    <div class="container">
+        <div class="container p-3 my-3 border">
+            <h2><?php if ($add==0) {echo "Editar"; } else {echo "Afegir";} ?> producte</h2>
+            <a class="btn btn-link" href=<?php echo "llista_items.php?prod=".$prod; ?>>Tornar</a>
+            <a class="btn btn-link" href="logout.php">Sortir</a>
+        </div>
 
-    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-        <div class="form-group">
-            <label for="descrip">Descripció:</label>
-            <input type="text" class="form-control" name="descrip" required value="<?php echo $descrip;?>">
-        </div>
-        <div class="form-group">
-            <label for="preu">Preu (€):</label>
-            <input type="number" class="form-control" min=0 step=".01" name="preu" value="<?php echo $preu;?>">
-        </div>
-        <?php if ($grupo==4) { ?>
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
             <div class="form-group">
-                <label for="preu">Fila:</label>
-                <input type="number" class="form-control" min=0 step="1" name="fila" required value="<?php echo $fila;?>">
+                <label for="descrip">Nom producte:</label>
+                <input type="text" class="form-control" name="descrip" required value="<?php echo $descrip;?>">
             </div>
-        <?php } ?>
-        <input type="text" class="form-control" hidden="true" name="grupo" value=" <?php echo $grupo; ?> ">
-        <input type="text" class="form-control" hidden="true" name="item" value=" <?php echo $item; ?> ">
-        <input type="text" class="form-control" hidden="true" name="add" value=" <?php echo $add; ?> ">
-        <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
-</div>
-
+            <div class="form-group">
+                <label for="preu">Preu (€):</label>
+                <input type="number" class="form-control" min=0 step=".01" name="preu" value="<?php echo $preu; ?>">
+            </div>
+            <?php if ($prod==4) { ?>
+                <div class="form-group">
+                    <label for="preu">Fila:</label>
+                    <input type="number" class="form-control" min=0 step="1" name="fila" required value="<?php echo $fila;?>">
+                </div>
+            <?php } ?>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" name="desact" id="desact"
+                        value="desactivado" <?php echo ($desactivado==1 ? "checked" : ""); ?>>
+                    <label class="custom-control-label" for="desact">Desactivar</label>
+                </div>
+            </div>
+            <input type="text" class="form-control" hidden="true" name="prod" value=" <?php echo $prod; ?> ">
+            <input type="text" class="form-control" hidden="true" name="item" value=" <?php echo $item; ?> ">
+            <input type="text" class="form-control" hidden="true" name="add" value=" <?php echo $add; ?> ">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    </div>
 <?php
     $conn->close();
 } else {
-    header("Location: index.php");
+    header("Location: logout.php");
 }?>
 
 

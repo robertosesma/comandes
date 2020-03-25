@@ -50,11 +50,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <h1>Llistat de productes</h1>
         <h3>Productora: <?php echo $descrip; ?></h3>
         <p><?php if ($activado) {
-            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$prod.'&act=0">Desactivar productora</a>';
+            echo '<a class="btn btn-link" href="toggle_prod.php?prod='.$prod.'&act=0">Desactivar productora</a>';
         } else {
-            echo '<a class="btn btn-link" href="toggle_prod.php?grupo='.$prod.'&act=1">Activar productora</a>';
+            echo '<a class="btn btn-link" href="toggle_prod.php?prod='.$prod.'&act=1">Activar productora</a>';
         }
-        echo '<a class="btn btn-link" href="edit_item.php?grupo='.$grupo.'&add=1">Afegir producte</a>'; ?></p>
+        echo '<a class="btn btn-link" href="edit_item.php?prod='.$prod.'&add=1">Afegir producte</a>'; ?></p>
         <p><a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>
