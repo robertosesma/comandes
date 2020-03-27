@@ -5,7 +5,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered">
         <thead class="thead-dark">
             <tr>
-                <th>Productor</th>
+                <th>Productora</th>
                 <th>Producte</th>
                 <th><div class='text-center'>Quantitat</div></th>
                 <th><div class='text-right'>Preu</div></th>
@@ -26,23 +26,20 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     <td> </td>
                     <td> </td>
                     <td><div class='text-right'>Subtotal</div></td>
-                    <td><div class='text-right font-weight-bold'><?php echo getsubtotal($conn,$uf,$fecha,$g0); ?></div></td>
+                    <?php $sub = getascurr(getsubtotal($conn,$uf,$fecha,$g0),"€"); ?>
+                    <td><div class='text-right font-weight-bold'><?php echo $sub; ?></div></td>
                     <?php if ($open) { ?><td> </td><?php } ?>
                 </tr>
             <?php }
-            $g0 = $row["cgrupo"];
-
-            $preu = ($row["precio"]==NULL ? '' : number_format($row["precio"], 2, ",", ".")."€");
-            $tot = ($row["total"]==NULL ? '' : number_format($row["total"], 2, ",", ".")."€");
-            ?>
+            $g0 = $row["cgrupo"]; ?>
             <tr>
                 <td><?php echo $row["dgrupo"]; ?></td>
                 <td><?php echo $row["item"]; ?></td>
                 <td><div class='text-center'><?php echo $row["n"]; ?></div></td>
-                <td><div class='text-right'><?php echo $preu; ?></div></td>
-                <td><div class='text-right'><?php echo $tot; ?></div></td>
+                <td><div class='text-right'><?php echo getascurr($row["precio"],"€"); ?></div></td>
+                <td><div class='text-right'><?php echo getascurr($row["total"],"€"); ?></div></td>
                 <?php if ($open) {
-                $del = 'delete.php?&fecha='.$fecha.'&item='.$row["tipo"];
+                $del = 'del_producte.php?item='.$row["tipo"];
                 echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td><tr>"; } ?>
             </tr>
             <?php
@@ -52,7 +49,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     <td> </td>
                     <td> </td>
                     <td><div class='text-right'>Subtotal</div></td>
-                    <td><div class='text-right font-weight-bold'><?php echo getsubtotal($conn,$uf,$fecha,$row["cgrupo"]); ?></div></td>
+                    <?php $sub = getascurr(getsubtotal($conn,$uf,$fecha,$g0),"€"); ?>
+                    <td><div class='text-right font-weight-bold'><?php echo $sub; ?></div></td>
                     <?php if ($open) { ?><td> </td><?php } ?>
                 </tr>
             <?php }

@@ -66,15 +66,17 @@ function getsubtotal($conn,$uf,$fecha,$grupo,$format){
 }
 
 function isopen(){
+    require_once 'dbconfig.php';
+
     $day = date("N");
     $hour = date("H");
 
     $open = false;
     $next=getnext();
-    $dini=2;
-    $dend=5;
-    $hini=10;
-    $hend=17;
+    $dini=$horari["dini"];
+    $hini=$horari["hini"];
+    $dend=$horari["dend"];
+    $hend=$horari["hend"];
     if (($day >= $dini) && ($day <= $dend)) {
         $open = true;
         if ((($day == $dini) && ($hour < $hini)) ||

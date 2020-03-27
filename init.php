@@ -53,9 +53,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <h1>Comandes</h1>
         <h2>UC: <?php echo $descrip; ?></h2>
     </div>
-    <a class='btn btn-success btn-block' href='comanda_new.php' >Comanda Actual</a>
-    <a class='btn btn-primary btn-block' href='userlist.php' >Històric Comandes</a>
-    <a class='btn btn-primary btn-block' href='resumlist.php' >Resum i Llistats</a>
+    <a class='btn btn-success btn-block' href='new_comanda.php'>Comanda Actual</a>
+    <a class='btn btn-primary btn-block' href='userlist.php'>Històric Comandes</a>
+    <a class='btn btn-primary btn-block' href='resumlist.php'>Resum i Llistats</a>
     <?php if ($_SESSION["admin"]==0){ echo "<a class='btn btn-secondary btn-block' href='edit_uc.php' >Dades UC</a>"; } ?>
     <?php if ($_SESSION["contacte"]==1){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?prod=".$prod."' >Editar productes</a>"; } ?>
     <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_uc.php'>Administrar UC</a>"; } ?>

@@ -14,12 +14,13 @@
 include 'func_aux.php';
 $ok = true;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
-    $uf = $_SESSION['username'];
-    $fecha = getnext();
-    $open = isopen();
-
     $conn = connect();
+    $uf = $_SESSION['username'];
     $descrip = getdescrip($conn,$uf);
+
+    $fecha = getnext();
+    $_SESSION["fecha"] = $fecha;
+    $open = isopen();
 
     // get UC comanda
     $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");
@@ -30,21 +31,20 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uctotal = gettotal($conn,$uf,$fecha);
 } else {
     $ok = false;
-    header("Location: index.php");
 }
 ?>
 
 <?php if ($ok) { ?>
 <div class="container">
-    <div class="jumbotron">
+    <div class="container p-3 my-3 border">
         <h1>Comanda <?php echo $fecha; ?></h1>
-        <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
+        <h2>UC: <?php echo $descrip; ?></h2>
         <h3>Total: <?php echo $uctotal; ?></h3>
         <p>Aquest total no inclou alguns productes de preu variable</p>
         <?php if (!$open) {
             echo "<h2 class='text-warning'>Comanda tancada</h2>";
         } else {
-            echo "<a class='btn btn-link' href='new_item.php?&fecha=".$fecha."'>Afegir producte</a>";
+            echo "<a class='btn btn-link' href='new_producte.php'>Afegir producte</a>";
         }?>
         <a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
@@ -56,7 +56,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
     $conn->close();
 } else {
-    header("Location: index.php");
+    header("Location: logout.php");
 }?>
 
 </body>
