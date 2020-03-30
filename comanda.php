@@ -26,11 +26,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $stmt->bind_param('is', $uf, $fecha);
     $stmt->execute();
     $com = $stmt->get_result();
-
-    $uctotal = gettotal($conn,$uf,$fecha);
+    $nrows = $com->num_rows;
+    if ($nrows > 0) {
+        $uctotal = gettotal($conn,$uf,$fecha);
+    } else {
+        $ok = false;
+    }
 } else {
     $ok = false;
-    header("Location: index.php");
 }
 ?>
 
@@ -38,10 +41,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <div class="container">
     <div class="jumbotron">
         <h1>Comanda <?php echo $fecha; ?></h1>
-        <h2>Unitat de Convivència: <?php echo $descrip; ?></h2>
+        <h2>UC: <?php echo $descrip; ?></h2>
         <h3>Total: <?php echo $uctotal; ?></h3>
         <p>Aquest total no inclou alguns productes de preu variable</p>
-        <a class="btn btn-link" href="userlist.php">Tornar</a>
+        <a class="btn btn-link" href="history.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 </div>
@@ -52,7 +55,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
     $conn->close();
 } else {
-    header("Location: index.php");
+    header("Location: logout.php");
 }?>
 
 </body>

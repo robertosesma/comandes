@@ -10,5 +10,6 @@ $horari = [
   'hini' => 10,
   'dend' => 5,
   'hend' => 17,
+  'next' => strtotime("next tuesday"),
 ];
 ?>

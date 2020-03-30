@@ -1,6 +1,6 @@
 <?php
 function connect(){
-    require_once 'dbconfig.php';
+    require 'dbconfig.php';
 
     $con = mysqli_connect($dbconfig['server'],$dbconfig['username'],$dbconfig['password'],$dbconfig['db']);
     if(!$con){
@@ -66,7 +66,7 @@ function getsubtotal($conn,$uf,$fecha,$grupo,$format){
 }
 
 function isopen(){
-    require_once 'dbconfig.php';
+    require 'dbconfig.php';
 
     $day = date("N");
     $hour = date("H");
@@ -88,7 +88,8 @@ function isopen(){
 }
 
 function getnext(){
-    return date('Y-m-d',strtotime("next tuesday"));
+    require 'dbconfig.php';
+    return $next = date('Y-m-d',$horari["next"]);
 }
 
 function getnextitem($conn){
