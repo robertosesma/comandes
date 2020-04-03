@@ -18,7 +18,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
     // obtenir les dades dels productors
     $stmt = $conn -> prepare("SELECT cod, dgrupo.descrip, dgrupo.uf, uf.descrip AS duf, activado FROM dgrupo
-        LEFT JOIN uf ON (uf.uf = dgrupo.uf)");
+        LEFT JOIN uf ON (uf.uf = dgrupo.uf) ORDER BY dgrupo.descrip");
     $stmt->execute();
     $prods = $stmt->get_result();
 } else {

@@ -8,9 +8,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $stmt = $conn -> prepare("SELECT fecha, cgrupo, SUM(t) AS total FROM resumen
     WHERE fecha = ? AND cgrupo = ?
     GROUP BY fecha, cgrupo");
-    $stmt->bind_param('si', $fecha, $r["cod"]);
+    $stmt->bind_param('si', $fecha, $productor);
     $stmt->execute();
     $total = $stmt->get_result();
+
     $nrows = $total->num_rows;
     if ($nrows > 0) {
         while($t = $total->fetch_assoc()) {
@@ -41,5 +42,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             <?php } ?>
             </tbody>
         </table>
-<?php }
+<?php } else {
+        echo "<h3>".$descrip.": Sense productes</h3>";
+    }
 } ?>

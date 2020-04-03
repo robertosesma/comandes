@@ -17,7 +17,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
 
     // obtenir les dades de les UC
-    $stmt = $conn -> prepare("SELECT * FROM uf");
+    $stmt = $conn -> prepare("SELECT * FROM uf ORDER BY descrip");
     $stmt->execute();
     $ucs = $stmt->get_result();
 } else {

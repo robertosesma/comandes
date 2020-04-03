@@ -1,4 +1,6 @@
 <?php
+$max_users = 10000;
+
 function connect(){
     require 'dbconfig.php';
 

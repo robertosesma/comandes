@@ -40,7 +40,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $stmt->execute();
             // afegir usuari productora
             $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip) VALUES (?,?)");
-            $uf = 1000+$prod;
+            $uf = $max_users+$prod;
             $stmt->bind_param('is', $uf, $descrip);
             $stmt->execute();
         } else {

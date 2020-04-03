@@ -40,9 +40,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($nrows > 0) {
             while($r = $users->fetch_assoc()) {
                  if (password_verify($pswd, $r["psswd"])) {
-                     $_SESSION['loggedin'] = true;
+                    $_SESSION['loggedin'] = true;
                     $_SESSION['username']=$user;
-                    echo '<script>window.location.href = "init.php";</script>';
+                    if ($user < $max_users) {
+                        header("Location: init.php");
+                    } else {
+                        header("Location: productora.php");
+                    }
                 } else {
                     $pswdErr = "La contrasenya no és correcta";
                 }
