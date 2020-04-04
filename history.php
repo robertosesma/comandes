@@ -47,7 +47,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             // la comanda actual té data superior a la data actual, i només s'ha de veure si la comanda actual està tancada
             $fecha_dt = new DateTime($fecha);
             $today_dt = new DateTime(date("Y-m-d"));
-            if ($fecha_dt < $today_dt || !isopen()) { ?>
+            if ($fecha_dt < $today_dt || !isopen($conn)) { ?>
                 <tr>
                     <td><?php echo "<a href='".$com."'>".$fecha."</a>"; ?></td>
                     <td><?php echo "<a href='".$resum."'>Resum</a>"; ?></td>

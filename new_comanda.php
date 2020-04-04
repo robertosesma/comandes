@@ -18,9 +18,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uf = $_SESSION['username'];
     $descrip = getdescrip($conn,$uf);
 
-    $fecha = getnext();
+    $fecha = getnext($conn);
     $_SESSION["fecha"] = $fecha;
-    $open = isopen();
+    $open = isopen($conn);
 
     // get UC comanda
     $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");

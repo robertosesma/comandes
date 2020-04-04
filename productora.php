@@ -15,11 +15,11 @@ include 'func_aux.php';
 $ok = true;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
-    $fecha = getnext();
+    $fecha = getnext($conn);
     $user = $_SESSION['username'];
     $descrip = getdescrip($conn,$user);
-    $productor = $user - $max_users;
-    $open = isopen();
+    $productor = $user - getmax($conn);
+    $open = isopen($conn);
 } else {
     $ok = false;
 }

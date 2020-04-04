@@ -39,8 +39,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $stmt->bind_param('isii', $prod, $descrip, $uf, $activado);
             $stmt->execute();
             // afegir usuari productora
+            $uf = getmax($conn)+$prod;
             $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip) VALUES (?,?)");
-            $uf = $max_users+$prod;
             $stmt->bind_param('is', $uf, $descrip);
             $stmt->execute();
         } else {

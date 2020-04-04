@@ -1,6 +1,4 @@
 <?php
-$max_users = 10000;
-
 function connect(){
     require 'dbconfig.php';
 
@@ -67,18 +65,22 @@ function getsubtotal($conn,$uf,$fecha,$grupo,$format){
     return $subtotal;
 }
 
-function isopen(){
-    require 'dbconfig.php';
-
+function isopen($conn){
+    // carregar dia/hora inici, dia/hora fin
+    $stmt = $conn -> prepare("SELECT * FROM admin");
+    $stmt->execute();
+    $dades = $stmt->get_result();
+    while ($r = mysqli_fetch_array($dades)) {
+        $dini = $r["dini"];
+        $hini = $r["hini"];
+        $dend = $r["dend"];
+        $hend = $r["dend"];
+    }
+    // dia i hora actuals
     $day = date("N");
     $hour = date("H");
-
+    // comprovar si estem en temps de comanda
     $open = false;
-    $next=getnext();
-    $dini=$horari["dini"];
-    $hini=$horari["hini"];
-    $dend=$horari["dend"];
-    $hend=$horari["hend"];
     if (($day >= $dini) && ($day <= $dend)) {
         $open = true;
         if ((($day == $dini) && ($hour < $hini)) ||
@@ -89,9 +91,24 @@ function isopen(){
     return $open;
 }
 
-function getnext(){
-    require 'dbconfig.php';
-    return $next = date('Y-m-d',$horari["next"]);
+function getnext($conn){
+    $stmt = $conn -> prepare("SELECT next FROM admin");
+    $stmt->execute();
+    $dades = $stmt->get_result();
+    while ($r = mysqli_fetch_array($dades)) {
+        $n = $r["next"];
+    }
+    return $next = date('Y-m-d',strtotime($n));
+}
+
+function getmax($conn){
+    $stmt = $conn -> prepare("SELECT max_uf FROM admin");
+    $stmt->execute();
+    $dades = $stmt->get_result();
+    while ($r = mysqli_fetch_array($dades)) {
+        $max = $r["max_uf"];
+    }
+    return $max;
 }
 
 function getnextitem($conn){

@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                  if (password_verify($pswd, $r["psswd"])) {
                     $_SESSION['loggedin'] = true;
                     $_SESSION['username']=$user;
-                    if ($user < $max_users) {
+                    if ($user < getmax($conn)) {
                         header("Location: init.php");
                     } else {
                         header("Location: productora.php");
