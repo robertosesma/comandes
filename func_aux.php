@@ -47,19 +47,14 @@ function gettotal($conn,$uf,$fecha){
     return $uctotal;
 }
 
-function getsubtotal($conn,$uf,$fecha,$grupo,$format){
+function getsubtotal($conn,$uf,$fecha,$grupo){
     $stmt = $conn -> prepare("SELECT SUM(total) AS subtotal FROM comanda WHERE fecha =? AND uf=? AND cgrupo=?");
     $stmt->bind_param('sii', $fecha, $uf, $grupo);
     $stmt->execute();
     $totals = $stmt->get_result();
     if ($totals->num_rows > 0) {
         while($r = $totals->fetch_assoc()) {
-            if ($format) {
-                $subtotal = ($r["subtotal"]==NULL ? '' : number_format($r["subtotal"], 2, ",", ".")."€");
-            } else {
-                $subtotal = ($r["subtotal"]==NULL ? '' : $r["subtotal"]);
-            }
-
+            $subtotal = ($r["subtotal"]==NULL ? '' : $r["subtotal"]);
         }
     }
     return $subtotal;
@@ -126,7 +121,7 @@ function getnextitem($conn){
 
 function getnextuf($conn){
     $next = '';
-    $stmt = $conn -> prepare("SELECT MAX(uf) AS max FROM uf;");
+    $stmt = $conn -> prepare("SELECT MAX(uf) AS max FROM uf WHERE uf < 10000;");
     $stmt->execute();
     $max = $stmt->get_result();
     if ($max->num_rows > 0) {

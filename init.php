@@ -18,7 +18,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
 
-    // es l'usuari administrador?
+    // és l'usuari administrador?
     $stmt = $conn -> prepare('SELECT * FROM uf WHERE uf = ?');
     $stmt->bind_param('i', $uf);
     $stmt->execute();
@@ -28,7 +28,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     }
     $res->free();
 
-    // es contacte de productor?
+    // és contacte de productor?
     $stmt = $conn -> prepare('SELECT * FROM dgrupo WHERE uf = ?');
     $stmt->bind_param('i', $uf);
     $stmt->execute();
@@ -42,6 +42,15 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         }
     }
     $res->free();
+
+    // es poden fer comandes?
+    $stmt = $conn -> prepare('SELECT * FROM admin');
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($r = $res->fetch_assoc()) {
+        $act = $r["comanda_act"];
+    }
+    $res->free();
 } else {
     $ok = false;
 }
@@ -52,14 +61,15 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <div class="jumbotron">
         <h1>Comandes</h1>
         <h2>UC: <?php echo $descrip; ?></h2>
+        <?php if ($act==0){ echo "<h2 class='text-warning'>No es possible fer noves comandes</h2>"; } ?>
     </div>
-    <a class='btn btn-success btn-block' href='new_comanda.php'>Comanda Actual</a>
-    <a class='btn btn-primary btn-block' href='history.php'>Històric Comandes</a>
-    <?php if ($_SESSION["admin"]==0){ echo "<a class='btn btn-secondary btn-block' href='edit_uc.php >Dades UC</a>"; } ?>
+    <?php if ($act==1){ echo "<a class='btn btn-success btn-block' href='new_comanda.php'>Comanda actual</a>"; } ?>
+    <a class='btn btn-primary btn-block' href='history.php'>Històric comandes</a>
+    <?php if ($_SESSION["admin"]==0) { echo "<a class='btn btn-secondary btn-block' href='edit_uc.php' >Dades UC</a>"; } ?>
     <?php if ($_SESSION["contacte"]==1){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?prod=".$prod."' >Editar productes</a>"; } ?>
     <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_uc.php'>Administrar UC</a>"; } ?>
-    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_prods.php'>Administrar Productores</a>"; } ?>
-    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin.php'>Administrar</a>"; } ?>
+    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin_prods.php'>Administrar productores</a>"; } ?>
+    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-secondary btn-block' href='admin.php'>Administrar aplicació</a>"; } ?>
     <a class="btn btn-link btn-block" href="logout.php">Sortir</a>
 </div>
 

@@ -1,15 +1,19 @@
+<?php session_start(); ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resum</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+</head>
+
+<body>
+
 <?php
-session_start();
-
-require 'vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 include 'func_aux.php';
-
+$ok = true;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
     && isset($_SESSION['username']) && isset($_GET['fecha'])) {
     $fecha = $_GET["fecha"];
@@ -22,133 +26,50 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
     $ucs = $stmt->get_result();
     $nuc = $ucs->num_rows;
 
-    if ($nuc>0) {
-        $spreadsheet = new Spreadsheet();
-        // propietats del document xls
-        $spreadsheet->getProperties()->setCreator('la coope')
-            ->setTitle('Llistat comanda '.$fecha)
-            ->setDescription('Llistat per Unitat de Convivència');
-        // nom de la fulla
-        $spreadsheet->getActiveSheet()->setTitle('Llistat');
-        // la fulla de càlcul activa és la primera (l'única)
-        $spreadsheet->setActiveSheetIndex(0);
-
-        // títol
-        $spreadsheet->getActiveSheet()
-            ->setCellValue('A1', 'Comanda '.$fecha)
-            ->setCellValue('A2', 'Unitats de Convivència: '.$nuc);
-
-        // estils amb diferent tamany i en negreta
-        $sHeader = array(
-        'font'  => array(
-            'bold' => true,
-            'size'  => 14,
-        ));
-        $sUC = array(
-        'font'  => array(
-            'bold' => true,
-            'size'  => 12,
-        ));
-        // capçaleres
-        $spreadsheet->getActiveSheet()->getStyle('A1:E2')->applyFromArray($sHeader);
-        $spreadsheet->getActiveSheet()->mergeCells('A1:E1');
-        $spreadsheet->getActiveSheet()->mergeCells('A2:E2');
-
-        $count = 1;
-        $row = 4;       // fila d'inici després de les capçaleres
-        while ($r = mysqli_fetch_array($ucs)) {
-            $uf = $r["uf"];
-            $uctotal = gettotal($conn,$uf,$fecha);
-
-            // títol UC + total
-            $spreadsheet->getActiveSheet()->setCellValue('A'.$row, $count.'. '.$r["descrip"].': '.$uctotal);
-            $spreadsheet->getActiveSheet()->getStyle('A'.$row.':E'.$row)->applyFromArray($sUC);
-            $spreadsheet->getActiveSheet()->mergeCells('A'.$row.':E'.$row);
-
-            // capçalera de productes
-            $row++;
-            $spreadsheet->getActiveSheet()
-                ->setCellValue('A'.$row, "Productor")
-                ->setCellValue('B'.$row, "Producte")
-                ->setCellValue('C'.$row, "Quantitat")
-                ->setCellValue('D'.$row, "Preu")
-                ->setCellValue('E'.$row, "Total");
-            $spreadsheet->getActiveSheet()->getStyle('A'.$row.':E'.$row)->getFont()->setBold(true);
-            $spreadsheet->getActiveSheet()->getStyle('A'.$row.':E'.$row)
-                ->getBorders()->getBottom()->setBorderStyle(Border::BORDER_MEDIUM);
-            $row++;
-            // productes
-            $stmt = $conn -> prepare("SELECT * FROM comanda WHERE fecha =? AND uf=?");
-            $stmt->bind_param('si', $fecha, $uf);
-            $stmt->execute();
-            $items = $stmt->get_result();
-            $nitems = $items->num_rows;
-            $g0 = 0;
-            while ($i = mysqli_fetch_array($items)) {
-                if ($g0>0 && $g0<>$i["cgrupo"]) {
-                    // subtotals per productor en canviar de productor
-                    $subtotal = getsubtotal($conn,$uf,$fecha,$g0);
-                    $spreadsheet->getActiveSheet()
-                        ->setCellValue('D'.$row, "SubTotal")
-                        ->setCellValue('E'.$row, $subtotal);
-                    $spreadsheet->getActiveSheet()->getStyle('D'.$row)->getAlignment()
-                            ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                    $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getNumberFormat()
-                        ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
-                    $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getFont()->setBold(true);
-                    $row++;
-                }
-                $g0 = $i["cgrupo"];
-                // detall de productes demanats
-                $preu = ($i["precio"]==NULL ? '' : $i["precio"]);
-                $tot = ($i["total"]==NULL ? '' : $i["total"]);
-                $spreadsheet->getActiveSheet()
-                    ->setCellValue('A'.$row, $i["dgrupo"])
-                    ->setCellValue('B'.$row, $i["item"])
-                    ->setCellValue('C'.$row, $i["n"])
-                    ->setCellValue('D'.$row, $preu)
-                    ->setCellValue('E'.$row, $tot);
-                $spreadsheet->getActiveSheet()
-                        ->getStyle('D'.$row.':E'.$row)->getNumberFormat()
-                        ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
-
-                $row++;
-            }
-            // l'últim subtotal s'ha d'afegir en sortir de la UC
-            $subtotal = getsubtotal($conn,$uf,$fecha,$g0);
-            $spreadsheet->getActiveSheet()
-                ->setCellValue('D'.$row, "SubTotal")
-                ->setCellValue('E'.$row, $subtotal);
-            $spreadsheet->getActiveSheet()->getStyle('D'.$row)->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-            $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getNumberFormat()
-                ->setFormatCode(NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
-            $spreadsheet->getActiveSheet()->getStyle('E'.$row)->getFont()->setBold(true);
-
-            $count++;
-            $row = $row + 2;
-        }
-        // ample columnes
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->SetAutoSize(true);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->SetAutoSize(true);
-        $spreadsheet->getActiveSheet()->calculateColumnWidths();
-
-        // configuració d'impressió
-        $spreadsheet->getActiveSheet()->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_A4);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setTop(1);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setRight(1);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setLeft(1);
-        $spreadsheet->getActiveSheet()->getPageMargins()->setBottom(1);
-
-        // crear l'arxiu xls i descarregar
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="Comanda_'.$fecha.'.xls"');
-        header('Cache-Control: max-age=0');
-        $writer = IOFactory::createWriter($spreadsheet, 'Xls');
-        $writer->save('php://output');
+    if ($nuc==0) {
+        $ok = false;
     }
 } else {
-    header("Location: logout.php");
+    $ok = false;
 }
-exit();
 ?>
+
+<?php if ($ok) { ?>
+<div class="container">
+    <div class="container p-3 my-3 border">
+        <h1>Llistat comanda <?php echo $fecha; ?></h1>
+        <h2>Unitats de Convivència: <?php echo $nuc; ?></h2>
+        <p>Els totals no inclouen alguns productes de preu variable</p>
+        <a class="btn btn-link" href="history.php">Tornar</a>
+        <a class="btn btn-link" href="logout.php">Sortir</a>
+    </div>
+</div>
+
+<div class="container">
+<?php $count = 1;
+while ($r = mysqli_fetch_array($ucs)) {
+    $uf = $r["uf"];
+
+    echo "<h3>".$count.". ".$r["descrip"].": ".gettotal($conn,$uf,$fecha)."</h3>";
+
+    // get UC comandes
+    $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");
+    $stmt->bind_param('is', $uf, $fecha);
+    $stmt->execute();
+    $com = $stmt->get_result();
+    $open = false;
+    include 'comanda_tbl.php';
+
+    $count++;
+    $row = $row + 2;
+} ?>
+</div>
+
+<?php
+    $conn->close();
+} else {
+    header("Location: logout.php");
+}?>
+
+</body>
+</html>

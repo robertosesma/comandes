@@ -34,8 +34,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $err = "El producte no pot quedar buit. Torni a introduir les dades.";
         } else {
             // comprobar si ja s'ha iniciat la comanda
-            $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha=?");
-            $stmt->bind_param('s',$fecha);
+            $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha=? AND uf=?");
+            $stmt->bind_param('si',$fecha,$uf);
             $stmt->execute();
             $comandes = $stmt->get_result();
             if ($comandes->num_rows == 0) {

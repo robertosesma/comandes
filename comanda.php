@@ -29,8 +29,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $nrows = $com->num_rows;
     if ($nrows > 0) {
         $uctotal = gettotal($conn,$uf,$fecha);
-    } else {
-        $ok = false;
     }
 } else {
     $ok = false;
@@ -39,7 +37,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
 <?php if ($ok) { ?>
 <div class="container">
-    <div class="jumbotron">
+    <div class="container p-3 my-3 border">
         <h1>Comanda <?php echo $fecha; ?></h1>
         <h2>UC: <?php echo $descrip; ?></h2>
         <h3>Total: <?php echo $uctotal; ?></h3>
@@ -50,9 +48,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 </div>
 
 <?php
-    $open = false;
-    include 'comanda_tbl.php';
-
+    if ($nrows > 0) {
+        $open = false;
+        include 'comanda_tbl.php';
+    } else { ?>
+        <div class="container">
+            <h1 class="text-warning">No hi ha productes</h1>
+        </div>
+<?php }
     $conn->close();
 } else {
     header("Location: logout.php");

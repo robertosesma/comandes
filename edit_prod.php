@@ -21,7 +21,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
 
     // obtenir llistat UF
-    $stmt = $conn -> prepare("SELECT uf, descrip FROM uf");
+    $stmt = $conn -> prepare("SELECT uf, descrip FROM uf ORDER BY descrip");
     $stmt->execute();
     $ufs = $stmt->get_result();
 

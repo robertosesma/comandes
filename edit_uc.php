@@ -31,8 +31,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             if ($admin==1) {
                 $activado = clear_input($_POST["act"]=="activado");
                 $activado = ($activado == 1 ? 1 : 0);
+                $admin = clear_input($_POST["admin"]=="activado");
+                $admin = ($admin == 1 ? 1 : 0);
             } else {
                 $activado = 1;
+                $admin = 0;
             }
             $pswd = clear_input($_POST["pswd1"]);
             // verificar contrasenya
@@ -49,16 +52,16 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 if ($add==1) {
                     // afegir nova UC
                     $uf = getnextuf($conn);
-                    $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip,psswd,email,act) VALUES (?,?,?,?,?)");
-                    $stmt->bind_param('isssi', $uf, $descrip, $password, $mail, $activado);
+                    $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip,psswd,email,act,admin) VALUES (?,?,?,?,?,?)");
+                    $stmt->bind_param('isssii', $uf, $descrip, $password, $mail, $activado, $admin);
                 } else {
                     // editar UC existent
                     if (strlen($pswd)>0) {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=? WHERE uf=?");
-                        $stmt->bind_param('sssii', $descrip, $mail, $password, $activado, $uf);
+                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=? WHERE uf=?");
+                        $stmt->bind_param('sssiii', $descrip, $mail, $password, $activado, $admin, $uf);
                     } else {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=? WHERE uf=?");
-                        $stmt->bind_param('ssii', $descrip, $mail, $activado, $uf);
+                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=? WHERE uf=?");
+                        $stmt->bind_param('ssiii', $descrip, $mail, $activado, $admin, $uf);
                     }
                 }
                 $stmt->execute();
@@ -86,6 +89,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                         $descrip = $r["descrip"];
                         $mail = $r["email"];
                         $activado = $r["act"];
+                        $isadmin = $r["admin"];
                     }
                 } else {
                     $ok = false;
@@ -108,7 +112,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <?php if ($ok) { ?>
 <div class="container">
     <div class="container p-3 my-3 border">
-        <h2><?php echo ($add==1 ? "Nova" : "Editar"); ?> UC</h2>
+        <h2><?php echo ($add==1 ? "Nova" : "Editar dades"); ?> UC</h2>
         <a class="btn btn-link" href=<?php echo ($admin==1 ? "admin_uc.php" : "init.php"); ?>>Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
@@ -141,12 +145,18 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <?php if ($admin==1) { ?>
             <div class="form-group">
                 <div class="custom-control custom-checkbox">
-                    <?php if ($activado==1) { ?>
-                        <input type="checkbox" class="custom-control-input" name="act" id="act" value="activado" checked>
-                    <?php } else { ?>
-                        <input type="checkbox" class="custom-control-input" name="act" id="act" value="activado">
-                    <?php } ?>
+                    <?php $check_act = ($activado==1 ? "checked" : ""); ?>
+                    <input type="checkbox" class="custom-control-input" name="act" id="act"
+                        value="activado" <?php echo $check_act; ?>>
                     <label class="custom-control-label" for="act">Activa</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <?php $check_admin = ($isadmin==1 ? "checked" : ""); ?>
+                    <input type="checkbox" class="custom-control-input" name="admin" id="admin"
+                        value="activado" <?php echo $check_admin; ?>>
+                    <label class="custom-control-label" for="admin">Administrador</label>
                 </div>
             </div>
         <?php } ?>
