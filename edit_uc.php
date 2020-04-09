@@ -33,12 +33,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             if ($admin==1) {
                 $activado = clear_input($_POST["act"]=="activado");
                 $activado = ($activado == 1 ? 1 : 0);
-                $admin = clear_input($_POST["admin"]=="activado");
-                $admin = ($admin == 1 ? 1 : 0);
-                $isadmin = $admin;
+                $isadmin = clear_input($_POST["admin"]=="activado");
+                $isadmin = ($isadmin == 1 ? 1 : 0);
             } else {
                 $activado = 1;
-                $admin = 0;
+                $isadmin = 0;
             }
             $pswd = clear_input($_POST["pswd1"]);
             // verificar contrasenya
@@ -51,35 +50,50 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     $err = true;
                 }
             }
+            // comprovar que la descrip no està repetida
             $stmt = $conn -> prepare("SELECT * FROM uf WHERE descrip=?");
             $stmt->bind_param('s', $descrip);
             $stmt->execute();
             $dades = $stmt->get_result();
             $nrows = $dades->num_rows;
             if ($nrows > 0) {
-                $descripErr = "El nom de la unitat de convivència ja existeix";
-                $err = true;
+                while($r = $dades->fetch_assoc()) {
+                    if ($uf != $r["uf"]) {
+                        $descripErr = "El nom de la unitat de convivència ja existeix";
+                        $err = true;
+                    }
+                }
             }
+            $dades->free();
             if (!$err) {
                 //  no hi ha errors
                 if ($add==1) {
                     // afegir nova UC
                     $uf = getnextuf($conn);
                     $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip,psswd,email,act,admin) VALUES (?,?,?,?,?,?)");
-                    $stmt->bind_param('isssii', $uf, $descrip, $password, $mail, $activado, $admin);
+                    $stmt->bind_param('isssii', $uf, $descrip, $password, $mail, $activado, $isadmin);
                 } else {
                     // editar UC existent
                     if (strlen($pswd)>0) {
                         $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=? WHERE uf=?");
-                        $stmt->bind_param('sssiii', $descrip, $mail, $password, $activado, $admin, $uf);
+                        $stmt->bind_param('sssiii', $descrip, $mail, $password, $activado, $isadmin, $uf);
                     } else {
                         $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=? WHERE uf=?");
-                        $stmt->bind_param('ssiii', $descrip, $mail, $activado, $admin, $uf);
+                        $stmt->bind_param('ssiii', $descrip, $mail, $activado, $isadmin, $uf);
                     }
                 }
                 $stmt->execute();
                 if ($admin==1) {
-                    header("Location: admin_uc.php");
+                    if ($uf == $_SESSION["username"]) {
+                        if ($isadmin==0) {
+                            $_SESSION['admin'] = 0;
+                            header("Location: init.php");
+                        } else {
+                            header("Location: admin_uc.php");
+                        }
+                    } else {
+                        header("Location: admin_uc.php");
+                    }
                 } else {
                     header("Location: init.php");
                 }
