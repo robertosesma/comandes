@@ -1,4 +1,4 @@
-<?php session_start();
+<?php 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $stmt = $conn -> prepare("SELECT * FROM resumen WHERE fecha = ? AND cgrupo = ?");
     $stmt->bind_param('si', $fecha, $productor);

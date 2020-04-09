@@ -1,4 +1,4 @@
-<?php session_start();
+<?php 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) { ?>
 <div class="container">
     <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered">

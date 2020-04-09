@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 include 'func_aux.php';

@@ -1,6 +1,6 @@
 <?php
 function connect(){
-    require 'dbconfig.php';
+    require '../dbconfig.php';
 
     $con = mysqli_connect($dbconfig['server'],$dbconfig['username'],$dbconfig['password'],$dbconfig['db']);
     if(!$con){

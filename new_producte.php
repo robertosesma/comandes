@@ -45,10 +45,26 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 $stmt->execute();
             }
             $comandes->free();
-            // afegir producte i tornar a la pàgina anterior
-            $stmt = $conn -> prepare("INSERT INTO items (fecha,uf,tipo,n) VALUES (?,?,?,?)");
-            $stmt->bind_param('siii',$fecha,$uf,$i,$n);
+            // comprovar si el producte ja s'ha afegit
+            $stmt = $conn -> prepare("SELECT * FROM items WHERE fecha=? AND uf=? AND tipo=?");
+            $stmt->bind_param('sii',$fecha,$uf,$i);
             $stmt->execute();
+            $dades = $stmt->get_result();
+            // afegir producte i tornar a la pàgina anterior
+            if ($dades->num_rows == 0) {
+                // si el producte no existeix, l'afegim
+                $stmt = $conn -> prepare("INSERT INTO items (fecha,uf,tipo,n) VALUES (?,?,?,?)");
+                $stmt->bind_param('siii',$fecha,$uf,$i,$n);
+            } else {
+                // si el producte ja existeix, sumem la quantitat
+                while ($r = mysqli_fetch_array($dades)) {
+                    $n = $n + $r["n"];
+                }
+                $stmt = $conn -> prepare("UPDATE items SET n=? WHERE fecha=? AND uf=? AND tipo=?");
+                $stmt->bind_param('isii',$n,$fecha,$uf,$i);
+            }
+            $stmt->execute();
+            $dades->free();
             echo '<script>window.location.href = "new_comanda.php";</script>';
         }
     }
@@ -119,7 +135,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         </div>
         <div class="form-group">
             <label id=lbl2 class="hidden_control">Quantitat:</label>
-            <input type="number" min="0" step="1" class="form-control hidden_control" name="n" id="qnt" required>
+            <input type="number" min="1" step="1" class="form-control hidden_control" name="n" id="qnt" value="1" required>
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>

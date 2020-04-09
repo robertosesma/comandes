@@ -26,7 +26,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $next = clear_input($_POST["next"]);
         $next = str_replace("_"," ",$next);
         $stmt = $conn -> prepare("UPDATE admin SET dini=?, hini=?, dend=?, hend=?, next=?, comanda_act=? WHERE id=1");
-        $stmt->bind_param('iiiisii', $dini, $hini, $dend, $hend, $next, $act);
+        $stmt->bind_param('iiiisi', $dini, $hini, $dend, $hend, $next, $act);
         $stmt->execute();
         header("Location: init.php");
     }

@@ -15,6 +15,8 @@
 include 'func_aux.php';
 $ok = true;
 $pswdErr = "";
+$descripErr = "";
+$err = false;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
     $add = clear_input($_GET["add"]);
@@ -33,6 +35,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 $activado = ($activado == 1 ? 1 : 0);
                 $admin = clear_input($_POST["admin"]=="activado");
                 $admin = ($admin == 1 ? 1 : 0);
+                $isadmin = $admin;
             } else {
                 $activado = 1;
                 $admin = 0;
@@ -45,9 +48,19 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             } else {
                 if (strlen($pswd)>0 || $add==1) {
                     $pswdErr = "La contrasenya ha de tenir com a mínim 8 caràcters";
+                    $err = true;
                 }
             }
-            if (strlen($pswdErr)==0) {
+            $stmt = $conn -> prepare("SELECT * FROM uf WHERE descrip=?");
+            $stmt->bind_param('s', $descrip);
+            $stmt->execute();
+            $dades = $stmt->get_result();
+            $nrows = $dades->num_rows;
+            if ($nrows > 0) {
+                $descripErr = "El nom de la unitat de convivència ja existeix";
+                $err = true;
+            }
+            if (!$err) {
                 //  no hi ha errors
                 if ($add==1) {
                     // afegir nova UC
@@ -118,10 +131,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     </div>
 
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"
-        oninput='pswd2.setCustomValidity(pswd2.value != pswd1.value ? "Les contrasenyes no coincideixen." : "")'>
+        <?php if ($add==0) { ?>
+            oninput='pswd2.setCustomValidity(pswd2.value != pswd1.value ? "Les contrasenyes no coincideixen." : "")' <?php } ?>>
         <div class="form-group">
             <label for="descrip">Nom unitat de convivència:</label>
             <input type="text" class="form-control" name="descrip" required value="<?php echo $descrip;?>">
+        </div>
+        <div class="form-group">
+            <span class="error text-danger"><?php echo $descripErr;?></span>
         </div>
         <div class="form-group">
             <label for="mail">Correu electrònic:</label>
@@ -138,10 +155,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <div class="form-group">
             <span class="error text-danger"><?php echo $pswdErr;?></span>
         </div>
+        <?php if ($add==0) { ?>
         <div class="form-group">
             <label for="pswd2">Confirma la contrasenya:</label>
             <input type="password" class="form-control" name="pswd2">
         </div>
+        <?php } ?>
         <?php if ($admin==1) { ?>
             <div class="form-group">
                 <div class="custom-control custom-checkbox">
