@@ -27,22 +27,21 @@ function getdescrip($conn,$uf){
     $users = $stmt->get_result();
     $descrip = "";
     if ($users->num_rows > 0) {
-        while($r = $users->fetch_assoc()) {
-            $descrip = $r["descrip"];
-        }
+        $r = $users->fetch_assoc();
+        $descrip = $r["descrip"];
     }
     return $descrip;
 }
 
 function gettotal($conn,$uf,$fecha){
-    $stmt = $conn -> prepare("SELECT Sum(total) AS total FROM comanda WHERE uf = ? AND fecha = ? GROUP BY fecha, uf");
+    $stmt = $conn -> prepare("SELECT SUM(total) AS total FROM comanda WHERE uf = ? AND fecha = ?");
     $stmt->bind_param('is', $uf, $fecha);
     $stmt->execute();
     $totals = $stmt->get_result();
+    $uctotal = '';
     if ($totals->num_rows > 0) {
-        while($r = $totals->fetch_assoc()) {
-            $uctotal = ($r["total"]==NULL ? '' : number_format($r["total"], 2, ",", ".")."€");
-        }
+        $r = $totals->fetch_assoc();
+        $uctotal = ($r["total"]==NULL ? '' : number_format($r["total"], 2, ",", ".")."€");
     }
     return $uctotal;
 }
@@ -52,10 +51,10 @@ function getsubtotal($conn,$uf,$fecha,$grupo){
     $stmt->bind_param('sii', $fecha, $uf, $grupo);
     $stmt->execute();
     $totals = $stmt->get_result();
+    $subtotal ='';
     if ($totals->num_rows > 0) {
-        while($r = $totals->fetch_assoc()) {
-            $subtotal = ($r["subtotal"]==NULL ? '' : $r["subtotal"]);
-        }
+        $r = $totals->fetch_assoc();
+        $subtotal = ($r["subtotal"]==NULL ? '' : $r["subtotal"]);
     }
     return $subtotal;
 }
@@ -65,12 +64,11 @@ function isopen($conn){
     $stmt = $conn -> prepare("SELECT * FROM admin");
     $stmt->execute();
     $dades = $stmt->get_result();
-    while ($r = mysqli_fetch_array($dades)) {
-        $dini = $r["dini"];
-        $hini = $r["hini"];
-        $dend = $r["dend"];
-        $hend = $r["dend"];
-    }
+    $r = mysqli_fetch_array($dades);
+    $dini = $r["dini"];
+    $hini = $r["hini"];
+    $dend = $r["dend"];
+    $hend = $r["dend"];
     // dia i hora actuals
     $day = date("N");
     $hour = date("H");
@@ -90,58 +88,44 @@ function getnext($conn){
     $stmt = $conn -> prepare("SELECT next FROM admin");
     $stmt->execute();
     $dades = $stmt->get_result();
-    while ($r = mysqli_fetch_array($dades)) {
-        $n = $r["next"];
-    }
-    return $next = date('Y-m-d',strtotime($n));
+    $r = mysqli_fetch_array($dades);
+    $next = date('Y-m-d',strtotime($r["next"]));
+    return $next;
 }
 
 function getmax($conn){
     $stmt = $conn -> prepare("SELECT max_uf FROM admin");
     $stmt->execute();
     $dades = $stmt->get_result();
-    while ($r = mysqli_fetch_array($dades)) {
-        $max = $r["max_uf"];
-    }
+    $r = mysqli_fetch_array($dades);
+    $max = $r["max_uf"];
     return $max;
 }
 
 function getnextitem($conn){
-    $next = '';
     $stmt = $conn -> prepare("SELECT MAX(tipo) AS max FROM dtipo;");
     $stmt->execute();
     $max = $stmt->get_result();
-    if ($max->num_rows > 0) {
-        while($r = $max->fetch_assoc()) {
-            $next = $r["max"]+1;
-        }
-    }
+    $r = $max->fetch_assoc();
+    $next = $r["max"]+1;
     return $next;
 }
 
 function getnextuf($conn){
-    $next = '';
     $stmt = $conn -> prepare("SELECT MAX(uf) AS max FROM uf WHERE uf < 10000;");
     $stmt->execute();
     $max = $stmt->get_result();
-    if ($max->num_rows > 0) {
-        while($r = $max->fetch_assoc()) {
-            $next = $r["max"]+1;
-        }
-    }
+    $r = $max->fetch_assoc();
+    $next = $r["max"]+1;
     return $next;
 }
 
 function getnextprod($conn){
-    $next = '';
     $stmt = $conn -> prepare("SELECT MAX(cod) AS max FROM dgrupo;");
     $stmt->execute();
     $max = $stmt->get_result();
-    if ($max->num_rows > 0) {
-        while($r = $max->fetch_assoc()) {
-            $next = $r["max"]+1;
-        }
-    }
+    $r = $max->fetch_assoc();
+    $next = $r["max"]+1;
     return $next;
 }
 

@@ -36,7 +36,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
 <?php if ($ok) { ?>
 <div class="container">
-    <div class="container p-3 my-3 border">
+    <div class="container pt-3 my-3 border">
         <h1>Comanda <?php echo $fecha; ?></h1>
         <h2>UC: <?php echo $descrip; ?></h2>
         <h3>Total: <?php echo $uctotal; ?></h3>
