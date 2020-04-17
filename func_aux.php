@@ -68,7 +68,7 @@ function isopen($conn){
     $dini = $r["dini"];
     $hini = $r["hini"];
     $dend = $r["dend"];
-    $hend = $r["dend"];
+    $hend = $r["hend"];
     // dia i hora actuals
     $day = date("N");
     $hour = date("H");
