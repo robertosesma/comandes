@@ -55,7 +55,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $g = $r["cod"];
             $prod_combo .= "<option value=".$g.">".$r["descrip"]."</option>";
             // obtenir els items per cada productor
-            $stmt = $conn -> prepare("SELECT dtipo.tipo, dtipo.descrip
+            $stmt = $conn -> prepare("SELECT dtipo.tipo, dtipo.descrip, dtipo.precio
                             FROM dtipo
                             WHERE (dtipo.grupo = ? AND dtipo.desactivado = 0)
                             ORDER BY dtipo.tipo");
@@ -66,7 +66,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $items_combos .= '<select id="'.$g.'" name="item'.$g.'" class="custom-select hidden_control">';
             $items_combos .= '<option selected></option>';
             while ($i = mysqli_fetch_array($items)) {
-                $items_combos .= "<option value=".$i["tipo"].">".$i["descrip"]."</option>";
+                $preu = getascurr($i["precio"],"€");
+                $preu = ($preu!='' ? " (".$preu.")" : '');
+                $items_combos .= "<option value=".$i["tipo"].">".$i["descrip"].$preu."</option>";
             }
             $items_combos .= "</select>";
         }
