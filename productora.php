@@ -35,7 +35,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         }  else {
             echo "<p>Els totals no inclouen alguns productes de preu variable</p>";
         }
-        if ($productor == 4) {
+        if ($productor == 4 && !$open) {
             echo '<a class="btn btn-link" href="pa.php?&fecha='.$fecha.'">Descarregar Excel</a>';
         }?>
         <a class="btn btn-link" href="logout.php">Sortir</a>
