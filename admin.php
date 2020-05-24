@@ -21,12 +21,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $hini = clear_input($_POST["hini"]);
         $dend = clear_input($_POST["dend"]);
         $hend = clear_input($_POST["hend"]);
+        $hora = clear_input($_POST["hora"]);
+        $delta = clear_input($_POST["delta"]);
         $act = (clear_input($_POST["act"])=="activado");
         $act = ($act == 1 ? 1 : 0);
         $next = clear_input($_POST["next"]);
         $next = str_replace("_"," ",$next);
-        $stmt = $conn -> prepare("UPDATE admin SET dini=?, hini=?, dend=?, hend=?, next=?, comanda_act=? WHERE id=1");
-        $stmt->bind_param('iiiisi', $dini, $hini, $dend, $hend, $next, $act);
+        $stmt = $conn -> prepare("UPDATE admin SET dini=?, hini=?, dend=?, hend=?, next=?, hora=?, delta=?, comanda_act=? WHERE id=1");
+        $stmt->bind_param('iiiisiii', $dini, $hini, $dend, $hend, $next, $hora, $delta, $act);
         $stmt->execute();
         header("Location: init.php");
     }
@@ -42,6 +44,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $hend = $r["hend"];
         $next = $r["next"];
         $next = str_replace(" ","_",$next);
+        $hora = $r["hora"];
+        $delta = $r["delta"];
         $act = $r["comanda_act"];
     }
     $days = array("Dilluns" => 1, "Dimarts" => 2, "Dimecres" => 3, "Dijous" => 4,
@@ -108,6 +112,16 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 }
             } ?>
             </select>
+        </div>
+        <div class="form-group">
+            <label for="hora">Hora inici recollida:</label>
+            <input type="number" min="0" max="24" step="1" class="form-control" name="hora"
+             value="<?php echo $hora;?>" required>
+        </div>
+        <div class="form-group">
+            <label for="delta">Increment (min):</label>
+            <input type="number" min="0" max="55" step="5" class="form-control" name="delta"
+             value="<?php echo $delta;?>" required>
         </div>
         <div class="form-group">
             <div class="custom-control custom-checkbox">

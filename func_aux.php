@@ -129,6 +129,24 @@ function getnextprod($conn){
     return $next;
 }
 
+function gethhmm($conn,$id){
+    $stmt = $conn -> prepare("SELECT * FROM admin");
+    $stmt->execute();
+    $dades = $stmt->get_result();
+    $r = mysqli_fetch_array($dades);
+
+    $hini = $r["hora"];
+    $d = $r["delta"];
+
+    $n = (60/$d);
+    $f = floor($id/($n+1));
+    $hora = $hini + $f;
+    $min = ($id - $n*$f - 1) * $d;
+    $t = str_pad($hora,2,"0",STR_PAD_LEFT).":".str_pad($min,2,"0",STR_PAD_LEFT);
+
+    return $t;
+}
+
 function generatepswd($length){
     // create new pasword
     // symbols to use

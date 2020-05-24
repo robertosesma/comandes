@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Resum</title>
+    <title>Horari</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -19,16 +19,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
     $fecha = $_GET["fecha"];
     $conn = connect();
 
-    // obtenir llista d'UC
-    $stmt = $conn -> prepare("SELECT uf, descrip FROM comanda WHERE fecha =? GROUP BY uf ORDER BY descrip");
+    // obtenir llista d'UC i horaris
+    $stmt = $conn -> prepare("SELECT uf.descrip AS d, c.hora AS h FROM comandes c
+                            LEFT JOIN uf ON (uf.uf = c.uf)
+                            WHERE fecha =? ORDER BY -hora DESC;");
     $stmt->bind_param('s', $fecha);
     $stmt->execute();
-    $ucs = $stmt->get_result();
-    $nuc = $ucs->num_rows;
-
-    if ($nuc==0) {
-        $ok = false;
-    }
+    $data = $stmt->get_result();
+    $nuc = $data->num_rows;
 } else {
     $ok = false;
 }
@@ -37,33 +35,33 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
 <?php if ($ok) { ?>
 <div class="container">
     <div class="container p-3 my-3 border">
-        <h1>Llistat comanda <?php echo $fecha; ?></h1>
+        <h1>Horaris comanda <?php echo $fecha; ?></h1>
         <h2>Unitats de Convivència: <?php echo $nuc; ?></h2>
-        <p>Els totals no inclouen alguns productes de preu variable</p>
-        <?php echo '<a class="btn btn-link" href="llistat_rtf.php?&fecha='.$fecha.'">Descarregar</a>'; ?>
         <a class="btn btn-link" href="history.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>
 </div>
 
 <div class="container">
-<?php $count = 1;
-while ($r = mysqli_fetch_array($ucs)) {
-    $uf = $r["uf"];
-
-    echo "<h3>".$count.". ".$r["descrip"].": ".gettotal($conn,$uf,$fecha)."</h3>";
-
-    // get UC comandes
-    $stmt = $conn -> prepare("SELECT * FROM comanda WHERE uf = ? AND fecha = ?");
-    $stmt->bind_param('is', $uf, $fecha);
-    $stmt->execute();
-    $com = $stmt->get_result();
-    $open = false;
-    include 'comanda_tbl.php';
-
-    $count++;
-    $row = $row + 2;
-} ?>
+    <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered">
+    <tbody>
+    <?php
+    $count = 1;
+    while ($r = mysqli_fetch_array($data)) { ?>
+        <tr>
+            <td><?php echo $count; ?></td>
+            <td><?php echo $r["d"]; ?></td>
+            <?php if (is_null($r["h"])) {
+                echo "<td></td>";
+            } else {
+                echo "<td>".gethhmm($conn,$r["h"])."</td>";
+            } ?>
+        </tr>
+    <?php
+        $count++;
+    } ?>
+    </tbody>
+    </table>
 </div>
 
 <?php

@@ -42,6 +42,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $fecha = $r["fecha"];
             $com = 'comanda.php?&fecha='.$fecha;
             $resum = 'resum.php?&fecha='.$fecha;
+            $horari = 'horari.php?&fecha='.$fecha;
             $llistat = 'llistat.php?&fecha='.$fecha;
             $pa = 'pa.php?&fecha='.$fecha;
             // la comanda actual té data superior a la data actual, i només s'ha de veure si la comanda actual està tancada
@@ -51,6 +52,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 <tr>
                     <td><?php echo "<a href='".$com."'>".$fecha."</a>"; ?></td>
                     <td><?php echo "<a href='".$resum."'>Resum</a>"; ?></td>
+                    <td><?php echo "<a href='".$horari."'>Horari</a>"; ?></td>
                     <td><?php echo "<a href='".$llistat."'>Llistat</a>"; ?></td>
                     <td><?php echo "<a href='".$pa."'>Llistat PA</a>"; ?></td>
                 </tr>
