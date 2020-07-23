@@ -26,7 +26,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $desactivado = clear_input($_POST["desact"]=="desactivado");
         $desactivado = ($desactivado == 1 ? 1 : 0);
         // la Fleca Roca - PA (4) té fila en el excel del productor
-        $fila = ($grupo==4 ? clear_input($_POST["fila"]) : NULL);
+        $fila = ($prod==4 ? clear_input($_POST["fila"]) : NULL);
         if ($add==0) {
             // editar un registre ja existent
             $item = clear_input($_POST["item"]);
