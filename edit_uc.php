@@ -19,7 +19,6 @@ $descripErr = "";
 $err = false;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
-    $add = clear_input($_GET["add"]);
     $admin = $_SESSION['admin'];
 
     if ($add==1 && $admin!=1) {
@@ -99,6 +98,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 }
             }
         } else {
+            $add = clear_input($_GET["add"]);
             if ($add==0) {
                 if ($admin==1 && isset($_GET['uc'])) {
                     $uf = clear_input($_GET["uc"]);

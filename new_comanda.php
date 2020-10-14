@@ -105,9 +105,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     <?php echo $prod_combo ?>
                 </div>
                 <div class="form-group">
-                    <span class="error text-danger"><?php echo $err;?></span>
-                </div>
-                <div class="form-group">
                     <label id=lbl1 class="hidden_control">Producte:</label>
                     <?php echo $items_combos ?>
                 </div>
