@@ -25,8 +25,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
                     new PHPRtfLite_Font(14, 'Arial'), new PHPRtfLite_ParFormat());
         $sect->writeText('Unitats de Convivència: '.$nuc,
                     new PHPRtfLite_Font(14, 'Arial'), new PHPRtfLite_ParFormat());
-        $sect->writeText('Els totals no inclouen alguns productes de preu variable',
+        $sect->writeText('**Els totals no inclouen alguns productes de preu variable',
                     new PHPRtfLite_Font(10, 'Arial'), new PHPRtfLite_ParFormat());
+        $sect->writeText(' ',new PHPRtfLite_Font(14, 'Arial'), new PHPRtfLite_ParFormat());
 
         $font = new PHPRtfLite_Font(10, 'Arial');
         $border = new PHPRtfLite_Border($rtf);
@@ -48,7 +49,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
             $com = $stmt->get_result();
             $nitems = $com->num_rows;
 
-            $sect->writeText("\n".'<b>'.$count.'. '.$r["descrip"].': '.gettotal($conn,$uf,$fecha).'</b>',
+            // comprovar si hi ha preus buits
+            $nota = "";
+            while ($i = mysqli_fetch_array($com)) {
+                if (getascurr($i["precio"],"€")=="") $nota = "**";
+            }
+            mysqli_data_seek($com, 0);
+
+            $sect->writeText('<b>'.$count.'. '.$r["descrip"].': '.gettotal($conn,$uf,$fecha).$nota.'</b>',
                         new PHPRtfLite_Font(12, 'Arial'), new PHPRtfLite_ParFormat());
 
             // crear tabla
@@ -84,21 +92,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
             $j = 1;
             $row++;
             while ($i = mysqli_fetch_array($com)) {
-                if (($i["cgrupo"] <> $g0 && $g0>0)) {
-                    // subtotal de grup
-                    $table->addRows(1, 0.7);
-                    $cell = $table->getCell($row, 4);
-                    $cell->writeText("Subtotal",$font);
-                    $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
-                    $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
-                    $cell = $table->getCell($row, 5);
-                    $cell->writeText("<b>".getascurr(getsubtotal($conn,$uf,$fecha,$g0),"€")."</b>",$font);
-                    $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
-                    $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
-                    $table->setBorderForCellRange($border, $row, 4, $row, 5);
+                $row_1 = $row - 1;
+                if (($i["cgrupo"] <> $g0 && $g0>0)) $table->setBorderForCellRange($borderBottom, $row_1, 1, $row_1, 5);
 
-                    $row++;
-                }
                 $g0 = $i["cgrupo"];
 
                 $table->addRows(1, 0.6);
@@ -113,29 +109,20 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
                 $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_CENTER);
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                 $cell = $table->getCell($row, 4);
-                $cell->writeText(getascurr($i["precio"],"€"),$font);
+                $precio = getascurr($i["precio"],"€");
+                $cell->writeText($precio,$font);
                 $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                 $cell = $table->getCell($row, 5);
                 $cell->writeText(getascurr($i["total"],"€"),$font);
                 $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
+                if ($precio == "") $table->setBackgroundForCellRange('#E2E2E2', $row, 1, $row, 5);
+
+                if ($j == $nitems) $table->setBorderForCellRange($borderBottom, $row, 1, $row, 5);
 
                 $row++;
-                if ($j == $nitems) {
-                    // últim subtotal de grup
-                    $table->addRows(1, 0.7);
-                    $cell = $table->getCell($row, 4);
-                    $cell->writeText("Subtotal",$font);
-                    $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
-                    $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
-                    $cell = $table->getCell($row, 5);
-                    $cell->writeText("<b>".getascurr(getsubtotal($conn,$uf,$fecha,$g0),"€")."</b>",$font);
-                    $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
-                    $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
-                    $table->setBorderForCellRange($borderTop, $row, 4, $row, 5);
-                    $table->setBorderForCellRange($borderBottom, $row, 1, $row, 5);
-                }
+
                 $j = $j + 1;
             }
             $count++;
