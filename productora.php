@@ -31,10 +31,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <h1>Comanda <?php echo $fecha; ?></h1>
         <h2>Resum</h2>
         <?php if ($open) {
-            echo "<h2 class='text-warning'>La comanda encara està oberta</h2>";
-        }  else {
-            echo "<p>Els totals no inclouen alguns productes de preu variable</p>";
+            echo "<h2 class='text-warning'>ATENCIÓ!! La comanda encara està oberta</h2>";
+			echo "<h2 class='text-warning'>Les dades no són DEFINITIVES</h2>";
         }
+		echo "<p>Els totals no inclouen alguns productes de preu variable</p>";
         if ($productor == 4 && !$open) {
             echo '<a class="btn btn-link" href="pa.php?&fecha='.$fecha.'">Descarregar Excel</a>';
         }?>
@@ -43,9 +43,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 </div>
 
 <div class="container">
-<?php if (!$open) {
-    include 'resum_prod.php';
-} ?>
+<?php include 'resum_prod.php'; ?>
 </div>
 
 <?php
