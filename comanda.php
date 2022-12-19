@@ -18,27 +18,30 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uf = $_SESSION['username'];
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
+    $horari_act = ishorari_act($conn);
 
     $reload = false;
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $fecha = clear_input($_POST["fecha"]);
-        $hora = clear_input($_POST["hour"]);
-        // comprovar que l'hora no està agafada
-        $stmt = $conn -> prepare("SELECT * FROM comandes WHERE uf!=? AND fecha=? AND hora=?");
-        $stmt->bind_param('isi', $uf, $fecha, $hora);
-        $stmt->execute();
-        $check = $stmt->get_result();
-        $nrows = $check->num_rows;
-        if ($nrows == 0) {
-            // gravar l'hora
-            $stmt = $conn -> prepare("UPDATE comandes SET hora=? WHERE fecha=? AND uf=?");
-            $stmt->bind_param('isi', $hora, $fecha, $uf);
+        if ($horari_act) {
+            $fecha = clear_input($_POST["fecha"]);
+            $hora = clear_input($_POST["hour"]);
+            // comprovar que l'hora no està agafada
+            $stmt = $conn -> prepare("SELECT * FROM comandes WHERE uf!=? AND fecha=? AND hora=?");
+            $stmt->bind_param('isi', $uf, $fecha, $hora);
             $stmt->execute();
-            header("Location: horari.php?&fecha=".$fecha);
-        } else {
-            echo "<script type='text/javascript'>alert('Hora no disponible, escull una diferent');</script>";
+            $check = $stmt->get_result();
+            $nrows = $check->num_rows;
+            if ($nrows == 0) {
+                // gravar l'hora
+                $stmt = $conn -> prepare("UPDATE comandes SET hora=? WHERE fecha=? AND uf=?");
+                $stmt->bind_param('isi', $hora, $fecha, $uf);
+                $stmt->execute();
+                header("Location: horari.php?&fecha=".$fecha);
+            } else {
+                echo "<script type='text/javascript'>alert('Hora no disponible, escull una diferent');</script>";
+            }
+            $reload = true;
         }
-        $reload = true;
     }
     if (($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['fecha'])) || $reload) {
         $fecha = ($reload ? $fecha : $_GET["fecha"]);
@@ -52,40 +55,42 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         if ($nrows > 0) {
             $uctotal = gettotal($conn,$uf,$fecha);
 
-            // obtenir hora recollida de la UC
-            $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha =? AND uf=?");
-            $stmt->bind_param('si', $fecha, $uf);
-            $stmt->execute();
-            $com_uf = $stmt->get_result();
-            $r = mysqli_fetch_array($com_uf);
-            $hora_uf = (is_null($r["hora"]) ? 0 : $r["hora"]);
-            $com_uf->free();
+            if ($horari_act) {
+                // obtenir hora recollida de la UC
+                $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha =? AND uf=?");
+                $stmt->bind_param('si', $fecha, $uf);
+                $stmt->execute();
+                $com_uf = $stmt->get_result();
+                $r = mysqli_fetch_array($com_uf);
+                $hora_uf = (is_null($r["hora"]) ? 0 : $r["hora"]);
+                $com_uf->free();
 
-            // obtenir nombre TOTAL de comandes (per calcular les hores)
-            $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha =?");
-            $stmt->bind_param('s', $fecha);
-            $stmt->execute();
-            $comandes = $stmt->get_result();
-            $ncom = $comandes->num_rows;
-            $comandes->free();
+                // obtenir nombre TOTAL de comandes (per calcular les hores)
+                $stmt = $conn -> prepare("SELECT * FROM comandes WHERE fecha =?");
+                $stmt->bind_param('s', $fecha);
+                $stmt->execute();
+                $comandes = $stmt->get_result();
+                $ncom = $comandes->num_rows;
+                $comandes->free();
 
-            // html del combo d'hores
-            $items_hores = "<option value=0></option>";
-            // obtenir la llista d'hores demanades en forma d'array per no mostrar-les
-            $stmt = $conn -> prepare("SELECT hora FROM comandes WHERE fecha=?");
-            $stmt->bind_param('s', $fecha);
-            $stmt->execute();
-            $hores = $stmt->get_result();
-            $res = array();
-            while ($h = mysqli_fetch_array($hores)) {
-                $res[] = $h["hora"];
-            }
-            $hores->free();
-            // carregar el combo amb les hores lliures i la demanada, si és el cas
-            for ($id=1; $id<=$ncom; $id++) {
-                if ($id==$hora_uf || !array_search($id,$res,TRUE)) {
-                    $sel = ($id==$hora_uf ? "selected" : "");
-                    $items_hores .= "<option value=".$id." ".$sel.">".gethhmm($conn,$id)."</option>";
+                // html del combo d'hores
+                $items_hores = "<option value=0></option>";
+                // obtenir la llista d'hores demanades en forma d'array per no mostrar-les
+                $stmt = $conn -> prepare("SELECT hora FROM comandes WHERE fecha=?");
+                $stmt->bind_param('s', $fecha);
+                $stmt->execute();
+                $hores = $stmt->get_result();
+                $res = array();
+                while ($h = mysqli_fetch_array($hores)) {
+                    $res[] = $h["hora"];
+                }
+                $hores->free();
+                // carregar el combo amb les hores lliures i la demanada, si és el cas
+                for ($id=1; $id<=$ncom; $id++) {
+                    if ($id==$hora_uf || !array_search($id,$res,TRUE)) {
+                        $sel = ($id==$hora_uf ? "selected" : "");
+                        $items_hores .= "<option value=".$id." ".$sel.">".gethhmm($conn,$id)."</option>";
+                    }
                 }
             }
         }
@@ -110,7 +115,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
 <?php
     if ($nrows > 0) {
-    ?>
+        if ($horari_act) {?>
         <div class="container p-3 my-3 border">
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                 <div class="form-group">
@@ -123,8 +128,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 <button type="submit" class="btn btn-primary">Enviar</button>
             </form>
         </div>
+<?php }
 
-<?php
         $open = false;
         include 'comanda_tbl.php';
     } else { ?>

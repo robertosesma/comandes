@@ -23,12 +23,19 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $hend = clear_input($_POST["hend"]);
         $hora = clear_input($_POST["hora"]);
         $delta = clear_input($_POST["delta"]);
-        $act = (clear_input($_POST["act"])=="activado");
+        $act = 0;
+        if (isset($_POST["act"])) $act = (clear_input($_POST["act"])=="activado");
         $act = ($act == 1 ? 1 : 0);
         $next = clear_input($_POST["next"]);
         $next = str_replace("_"," ",$next);
-        $stmt = $conn -> prepare("UPDATE admin SET dini=?, hini=?, dend=?, hend=?, next=?, hora=?, delta=?, comanda_act=? WHERE id=1");
-        $stmt->bind_param('iiiisiii', $dini, $hini, $dend, $hend, $next, $hora, $delta, $act);
+        $horari_act = 0;
+        if (isset($_POST["horari_act"])) $horari_act = (clear_input($_POST["horari_act"])=="activado");
+        $horari_act = ($horari_act == 1 ? 1 : 0);
+        $quota = clear_input($_POST["quota"]);
+        $quota = (strlen($quota)>0 ? str_replace(",",".",$quota) : NULL);
+        $stmt = $conn -> prepare("UPDATE admin SET dini=?, hini=?, dend=?, hend=?, next=?, hora=?,
+            delta=?, comanda_act=?, horari_act=?, quota=? WHERE id=1");
+        $stmt->bind_param('iiiisiiiid', $dini, $hini, $dend, $hend, $next, $hora, $delta, $act, $horari_act, $quota);
         $stmt->execute();
         header("Location: init.php");
     }
@@ -47,6 +54,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $hora = $r["hora"];
         $delta = $r["delta"];
         $act = $r["comanda_act"];
+        $quota = $r["quota"];
+        $horari_act = $r["horari_act"];
     }
     $days = array("Dilluns" => 1, "Dimarts" => 2, "Dimecres" => 3, "Dijous" => 4,
             "Divendres" => 5, "Dissabte" => 6, "Diumenge" =>7 );
@@ -114,6 +123,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             </select>
         </div>
         <div class="form-group">
+            <label for="preu">Quota anual (€):</label>
+            <input type="number" class="form-control" min=0 step=".01" name="quota" value="<?php echo $quota; ?>">
+        </div>
+        <div class="form-group">
             <label for="hora">Hora inici recollida:</label>
             <input type="number" min="0" max="24" step="1" class="form-control" name="hora"
              value="<?php echo $hora;?>" required>
@@ -122,6 +135,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             <label for="delta">Increment (min):</label>
             <input type="number" min="0" max="55" step="5" class="form-control" name="delta"
              value="<?php echo $delta;?>" required>
+        </div>
+        <div class="form-group">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" name="horari_act" id="horari_act"
+                    value="activado" <?php echo ($horari_act==1 ? "checked" : ""); ?>>
+                <label class="custom-control-label" for="horari_act">Horari activat</label>
+            </div>
         </div>
         <div class="form-group">
             <div class="custom-control custom-checkbox">

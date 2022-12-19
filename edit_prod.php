@@ -30,7 +30,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $descrip = clear_input($_POST["descrip"]);
         $uf = clear_input($_POST["uf"]);
         $uf = (strlen($uf)>0 ? $uf : null);
-        $activado = clear_input($_POST["act"]=="activado");
+        $activado = 0;
+        if (isset($_POST["act"])) $activado = (clear_input($_POST["act"])=="activado");
         $activado = ($activado == 1 ? 1 : 0);
         if ($add==1) {
             // afegir nova productora

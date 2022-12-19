@@ -30,11 +30,16 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $descrip = $r["descrip"];
             $activado = $r["activado"];
         }
-        // obtenirm els productes del productor
-        $stmt = $conn -> prepare("SELECT * FROM dtipo WHERE grupo = ?");
+        // obtenim els productes del productor
+        $ordre = "";
+        if (isset($_GET["ord"])) {
+            if (clear_input($_GET["ord"])==1) $ordre = "ORDER BY descrip";
+        }
+        $stmt = $conn -> prepare("SELECT * FROM dtipo WHERE grupo = ? ".$ordre);
         $stmt->bind_param('i', $prod);
         $stmt->execute();
         $items = $stmt->get_result();
+        $nitems = $items->num_rows;
     } else {
         $ok = false;
     }
@@ -49,12 +54,15 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <div class="container p-3 my-3 border">
         <h1>Llistat de productes</h1>
         <h3>Productora: <?php echo $descrip; ?></h3>
+        <h4><?php echo $nitems; ?> productes</h4>
         <p><?php if ($activado) {
             echo '<a class="btn btn-link" href="toggle_prod.php?prod='.$prod.'&act=0">Desactivar productora</a>';
         } else {
             echo '<a class="btn btn-link" href="toggle_prod.php?prod='.$prod.'&act=1">Activar productora</a>';
         }
         echo '<a class="btn btn-link" href="edit_item.php?prod='.$prod.'&add=1">Afegir producte</a>'; ?></p>
+        <p><?php echo '<a class="btn btn-link" href="llista_items.php?prod='.$prod.'&ord=1">Ordre alfabètic</a>';
+        echo '<a class="btn btn-link" href="llista_items.php?prod='.$prod.'&ord=0">Ordre entrada</a>'; ?></p>
         <p><a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>
@@ -66,7 +74,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             <tr>
                 <th>Producte</th>
                 <th><div class='text-right'>Preu</div></th>
-                <?php if ($grupo==4) { ?><th><div class='text-center'>Fila</div></th><?php } ?>
+                <?php if ($prod==4) { ?><th><div class='text-center'>Fila</div></th><?php } ?>
             </tr>
         </thead>
         <?php while ($i = mysqli_fetch_array($items)) {

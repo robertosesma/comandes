@@ -17,6 +17,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uf = $_SESSION['username'];
     $conn = connect();
     $descrip = getdescrip($conn,$uf);
+    $horari_act = ishorari_act($conn);
 
     // obtenir llistat de comandes
     $stmt = $conn -> prepare("SELECT * FROM comandes GROUP BY fecha ORDER BY fecha DESC");
@@ -53,7 +54,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 <tr>
                     <td><?php echo "<a href='".$com."'>".$fecha."</a>"; ?></td>
                     <td><?php echo "<a href='".$resum."'>Resum</a>"; ?></td>
-                    <td><?php echo "<a href='".$horari."'>Horari</a>"; ?></td>
+                    <?php if ($horari_act) { echo "<td><a href='".$horari."'>Horari</a></td>"; } ?>
                     <td><?php echo "<a href='".$llistat."'>Llistat</a>"; ?></td>
                     <td><?php echo "<a href='".$pa."'>Llistat PA</a>"; ?></td>
                 </tr>

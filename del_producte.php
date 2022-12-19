@@ -5,7 +5,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     if (isset($_GET['item'])) {
         $uf = $_SESSION['username'];
         $fecha = $_SESSION['fecha'];
-        $item = $_GET["item"];
+        $item = clear_input($_GET["item"]);
 
         // esborrar el producte
         $conn = connect();

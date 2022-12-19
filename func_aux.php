@@ -59,6 +59,17 @@ function getsubtotal($conn,$uf,$fecha,$grupo){
     return $subtotal;
 }
 
+function ishorari_act($conn){
+    // sistema horari activat
+    $stmt = $conn -> prepare("SELECT * FROM admin");
+    $stmt->execute();
+    $dades = $stmt->get_result();
+    $r = mysqli_fetch_array($dades);
+    $horari_act = ($r["horari_act"]==1);
+    $dades->free();
+    return $horari_act;
+}
+
 function isopen($conn){
     // carregar dia/hora inici, dia/hora fin
     $stmt = $conn -> prepare("SELECT * FROM admin");
@@ -120,6 +131,21 @@ function getnextuf($conn){
     return $next;
 }
 
+function getnextmembre($conn,$uf){
+    $stmt = $conn -> prepare("SELECT MAX(n) AS max FROM membres WHERE uf = ?;");
+    $stmt->bind_param('i', $uf);
+    $stmt->execute();
+    $max = $stmt->get_result();
+    $nrows = $max->num_rows;
+    if ($nrows>0) {
+        $r = $max->fetch_assoc();
+        $next = $r["max"]+1;
+    } else {
+        $next = 1;
+    }
+    return $next;
+}
+
 function getnextprod($conn){
     $stmt = $conn -> prepare("SELECT MAX(cod) AS max FROM dgrupo;");
     $stmt->execute();
@@ -145,6 +171,15 @@ function gethhmm($conn,$id){
     $t = str_pad($hora,2,"0",STR_PAD_LEFT).":".str_pad($min,2,"0",STR_PAD_LEFT);
 
     return $t;
+}
+
+function getyini(){
+    return 2022;
+}
+
+function getyend(){
+    // date("Y");
+    return 2023;
 }
 
 function generatepswd($length){

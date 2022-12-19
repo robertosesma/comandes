@@ -23,7 +23,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $descrip = clear_input($_POST["descrip"]);
         $preu = clear_input($_POST["preu"]);
         $preu = (strlen($preu)>0 ? str_replace(",",".",$preu) : NULL);
-        $desactivado = clear_input($_POST["desact"]=="desactivado");
+        $desactivado = 0;
+        if (isset($_POST["desact"])) $desactivado = (clear_input($_POST["desact"])=="desactivado");
         $desactivado = ($desactivado == 1 ? 1 : 0);
         // la Fleca Roca - PA (4) té fila en el excel del productor
         $fila = ($prod==4 ? clear_input($_POST["fila"]) : NULL);

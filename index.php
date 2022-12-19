@@ -59,7 +59,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container">
     <div class="jumbotron">
         <h1>comandes</h1>
-        <p>Cooperativa de Consum i Resistència Terrassa</p>
+        <h3>Cooperativa de Consum i Resistència Terrassa</h3>
+        <a class="btn btn-link" href="info.html">Informació</a>
     </div>
 
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
