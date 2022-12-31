@@ -199,4 +199,21 @@ function getascurr($v,$currency){
     return ($v==NULL ? '' : number_format($v, 2, ",", ".").$currency);
 }
 
+function getmes($m){
+    $mes = "";
+    if ($m==1) $mes = "Gen";
+    if ($m==2) $mes = "Feb";
+    if ($m==3) $mes = "Mar";
+    if ($m==4) $mes = "Abr";
+    if ($m==5) $mes = "Mai";
+    if ($m==6) $mes = "Jun";
+    if ($m==7) $mes = "Jul";
+    if ($m==8) $mes = "Ago";
+    if ($m==9) $mes = "Set";
+    if ($m==10) $mes = "Oct";
+    if ($m==11) $mes = "Nov";
+    if ($m==12) $mes = "Des";
+    return $mes;
+}
+
 ?>

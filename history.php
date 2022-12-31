@@ -33,9 +33,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <div class="jumbotron">
         <h1>Històric de Comandes</h1>
         <h2>UC: <?php echo $descrip; ?></h2>
-        <a class="btn btn-link" href="descarregar_excel.php">Descarregar Excel</a>
-        <a class="btn btn-link" href="init.php">Tornar</a>
-        <a class="btn btn-link" href="logout.php">Sortir</a>
+        <p><a class="btn btn-link" href="descarregar_excel.php">Descarregar Excel</a>
+        <a class="btn btn-link" href="resum_any.php">Resum anual</a></p>
+        <p><a class="btn btn-link" href="init.php">Tornar</a>
+        <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>
 
     <table cellpadding="0" cellspacing="0" border="0" class="table table-hover table-bordered">
