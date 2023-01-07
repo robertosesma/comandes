@@ -174,12 +174,11 @@ function gethhmm($conn,$id){
 }
 
 function getyini(){
-    return 2022;
+    return 2023;
 }
 
 function getyend(){
-    // date("Y");
-    return 2023;
+    return date("Y");
 }
 
 function generatepswd($length){

@@ -56,7 +56,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $stmt->execute();
             $res = $stmt->get_result();
             $t = mysqli_fetch_array($res);
-            echo "<h3>TOTAL ".$t["total"]."€</h3>"; }?>
+            echo "<h3>TOTAL ".getascurr($t["total"],"€")."</h3>"; }?>
         Any <?php echo $years?><br>
         <?php if ($year!=0) {
             echo "<a class='btn btn-link' href='quotes.php?year=".$year."&pendent=1'>Pendents</a>";
