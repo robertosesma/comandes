@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <h3>Cooperativa de Consum i Resistència Terrassa</h3>
         <a class="btn btn-link" href="info.html">Informació</a>
         <?php $url = $_SERVER['HTTP_HOST'];
-        if (str_contains($url,'consum')) { 
+        if (strpos($url,'consum') !== false) {
             echo "<h4 class='text-danger'>ATENCIÓ! Si us plau, utilitzeu 
             la nova direcció atzur.org</h4>";
             echo "<h5 class='text-danger'>La direcció consumiresistencia.savamala.top 
