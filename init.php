@@ -7,6 +7,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="carxofa.png"/>
 </head>
 
 <body>
@@ -81,8 +83,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 
 <?php if ($ok) { ?>
 <div class="container">
-    <div class="jumbotron">
-        <h1>Comandes</h1>
+    <div class="jumbotron" style="margin-top:5px"></div>
+    <div style="margin-top:10px">
         <h2>UC: <?php echo $descrip; ?></h2>
         <?php if ($nquotes==0 && $date_now>$date_ref){ echo "<h2 class='text-danger'>Quota any ".$year." pendent</h2>"; } ?>
         <?php if ($nmembres==0){ echo "<h2 class='text-warning'>No hi ha membres definits</h2>";

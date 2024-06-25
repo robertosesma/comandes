@@ -20,8 +20,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $horari_act = ishorari_act($conn);
 
     // obtenir llistat de comandes
-    $stmt = $conn -> prepare("SELECT * FROM comandes GROUP BY fecha ORDER BY fecha DESC");
+    $stmt = $conn -> prepare("SELECT fecha FROM comandes GROUP BY fecha ORDER BY fecha DESC");
     $stmt->execute();
+
     $dades = $stmt->get_result();
 } else {
     $ok = false;

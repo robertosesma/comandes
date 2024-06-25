@@ -41,6 +41,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
         <h2>Unitats de Convivència: <?php echo $nuc; ?></h2>
         <p>Els totals no inclouen alguns productes de preu variable</p>
         <?php echo '<a class="btn btn-link" href="llistat_rtf.php?&fecha='.$fecha.'">Descarregar</a>'; ?>
+        <?php echo '<a class="btn btn-link" href="preuvar.php?&fecha='.$fecha.'">Preu var.</a>'; ?>
+        <?php echo '<a class="btn btn-link" href="des_items.php?&fecha='.$fecha.'">Anul·lar prod.</a>'; ?>
         <a class="btn btn-link" href="history.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a>
     </div>

@@ -1,0 +1,8 @@
+.jumbotron{
+  margin:0px 0px 0px 0px;
+  border-radius:10px;
+  background:#688f56 url(logo.jpg);
+  background-repeat: no-repeat;
+  background-size: contain;
+  height: 280px;
+}

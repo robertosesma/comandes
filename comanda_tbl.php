@@ -35,8 +35,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 <td><?php echo $row["dgrupo"]; ?></td>
                 <td><?php echo $row["item"]; ?></td>
                 <td><div class='text-center'><?php echo $row["n"]; ?></div></td>
-                <td><div class='text-right'><?php echo getascurr($row["precio"],"€"); ?></div></td>
-                <td><div class='text-right'><?php echo getascurr($row["total"],"€"); ?></div></td>
+                <td><div class='text-right'><?php echo ($row["desact"]==0 ? getascurr($row["precio"],"€") : "ANUL·LAT"); ?></div></td>
+                <td><div class='text-right'><?php echo ($row["desact"]==0 ? getascurr($row["total"],"€") : "0€"); ?></div></td>
                 <?php if ($open) {
                 $del = 'del_producte.php?item='.$row["tipo"];
                 echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td><tr>"; } ?>

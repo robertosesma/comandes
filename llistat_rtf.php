@@ -110,11 +110,11 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                 $cell = $table->getCell($row, 4);
                 $precio = getascurr($i["precio"],"€");
-                $cell->writeText($precio,$font);
+                $cell->writeText(($i["desact"]==1 ? "ANUL·LAT" : $precio),$font);
                 $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                 $cell = $table->getCell($row, 5);
-                $cell->writeText(getascurr($i["total"],"€"),$font);
+                $cell->writeText(($i["desact"]==1 ? "0" : getascurr($i["total"],"€")),$font);
                 $cell->setTextAlignment(PHPRtfLite_Table_Cell::TEXT_ALIGN_RIGHT);
                 $cell->setVerticalAlignment(PHPRtfLite_Table_Cell::VERTICAL_ALIGN_CENTER);
                 if ($precio == "") $table->setBackgroundForCellRange('#E2E2E2', $row, 1, $row, 5);

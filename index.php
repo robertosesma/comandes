@@ -3,10 +3,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Comandes registre</title>
+    <title>Atzur</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="carxofa.png"/>
 </head>
 
 <body>
@@ -57,21 +59,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <div class="container">
-    <div class="jumbotron">
-        <h1>comandes</h1>
-        <h3>Cooperativa de Consum i Resistència Terrassa</h3>
+    <div>
         <a class="btn btn-link" href="info.html">Informació</a>
-        <?php $url = $_SERVER['HTTP_HOST'];
-        if (strpos($url,'consum') !== false) {
-            echo "<h4 class='text-danger'>ATENCIÓ! Si us plau, utilitzeu 
-            la nova direcció atzur.org</h4>";
-            echo "<h5 class='text-danger'>La direcció consumiresistencia.savamala.top 
-            deixarà de funcionar l'abril de 2024</h5>";
-        } ?>
+        <a class="btn btn-link" href="benvinguda.html">Benvinguda</a>
+        <a class="btn btn-link" href="obertura.html">Obertura</a>
+        <a class="btn btn-link" href="guia.pdf">Guia</a>
     </div>
 
+    <div class="jumbotron"></div>
+
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-        <div class="form-group">
+        <div class="form-group" style="margin-top:10px">
             <label for="uf">Unitat de convivència:</label>
             <select name="uf" class="custom-select">
                 <option selected></option>
