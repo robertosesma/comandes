@@ -43,6 +43,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             </tbody>
         </table>
 <?php } else {
-        echo "<h3>".$descrip.": Sense productes</h3>";
+        //echo "<h3>".$descrip.": Sense productes</h3>";
     }
 } ?>

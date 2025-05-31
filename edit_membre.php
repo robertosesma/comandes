@@ -112,7 +112,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         de Consum i Resistència de Terrassa, la finalitat de la qual és el correcte funcionament del sistema de
         comandes. Així mateix, li informem que les seves dades no seran cedides a tercers sense el seu consentiment.
         Pot exercir els seus drets d'Accés, Rectificació, Cancel·lació i Oposició a
-        <a href="https://consumiresistencia.gq">https://consumiresistencia.gq</a>.</p>
+        <a href="https://atzur.org/">https://atzur.org/</a>.</p>
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="accept" required>
             <label class="form-check-label">Accepto cedir les meves dades</label>
