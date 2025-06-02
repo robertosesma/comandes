@@ -94,6 +94,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     <?php if ($act==1){ echo "<a class='btn btn-success btn-block' href='new_comanda.php'>Comanda actual</a>"; } ?>
     <a class='btn btn-primary btn-block' href='history.php'>Històric comandes</a>
     <a class='btn btn-info btn-block' href='https://docs.google.com/spreadsheets/d/1ELxhd3KJ8p5y4S3GIt5B6dIFghN7xlx6/' target="_blank" rel="noopener noreferrer">Calendari Obertures</a>
+    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-info btn-block' href='calendari.php'>Calendari</a>"; } ?>
     <?php if ($_SESSION["admin"]==0) { echo "<a class='btn btn-secondary btn-block' href='edit_uc.php?add=0' >Dades UC</a>"; } ?>
     <?php if ($_SESSION["contacte"]==1){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?prod=".$prod."' >Editar productes</a>"; } ?>
     <?php if ($_SESSION["admin"]==1 || $_SESSION["tresorer"]==1){ echo "<a class='btn btn-secondary btn-block' href='quotes.php' >Quotes</a>"; } ?>
