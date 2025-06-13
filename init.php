@@ -30,6 +30,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $_SESSION["admin"] = $r["admin"];
     // és tresorera?
     $_SESSION["tresorer"] = $r["tresorer"];
+    // és calendari?
+    $_SESSION["calendari"] = $r["calendari"];
     $res->free();
 
     // és contacte de productor?

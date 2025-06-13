@@ -18,17 +18,18 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $uf = $_SESSION['username'];
     $conn = connect();
 
-    $edit = $_SESSION["admin"] || $_SESSION["calendar"];
+    $edit = $_SESSION["admin"] || $_SESSION["calendari"];
     
     // get calendari
     $stmt = $conn -> prepare("SELECT c.fecha, 
-        c.uc1, uf1.descrip AS desc1, c.uc2, uf2.descrip AS desc2,
+        c.uc1, uf1.descrip AS desc1, uf1.act AS act1, 
+        c.uc2, uf2.descrip AS desc2, uf2.act AS act2, 
         c.cerrado, c.asamblea, c.coment
         FROM comandes.calendari c
         LEFT JOIN comandes.uf uf1 on (uf1.uf = c.uc1)
         LEFT JOIN comandes.uf uf2 on (uf2.uf = c.uc2)
         WHERE fecha >= '2024-01-01' ORDER BY fecha");
-    // $stmt->bind_param('s', date('Y-m-d'));
+//        WHERE fecha >= NOW() ORDER BY fecha");
     $stmt->execute();
     $cal = $stmt->get_result();
 } else {
@@ -48,22 +49,26 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <tbody>
         <?php while ($r = mysqli_fetch_array($cal)) { 
             $fecha = $r['fecha'];
-            if ($edit) $fecha = "<a href='".'edit_calendari.php?&fecha='.$fecha."'>".$fecha."</a>";
+            if ($edit) $fecha = "<a href='".'edit_obertura.php?&fecha='.$fecha."'>".$fecha."</a>";
 
             $u1 = ($r['cerrado'] ? 'TANCAT' : $r['desc1']);
             if ($r['uc1']==$uf) $u1 = '<mark><strong>'.$u1.'</strong></mark>';
+            if (!$r['act1']) $u1 = '<em>'.$u1.'</em>';
+            $m1 = (!$r['act1'] ? 'class= "text-muted"' : '');
 
             $u2 = ($r['cerrado'] ? 'TANCAT' : $r['desc2']);
             if ($r['uc2']==$uf) $u2 = '<mark><strong>'.$u2.'</strong></mark>';
+            if (!$r['act2']) $u2 = '<em>'.$u2.'</em>';
+            $m2 = (!$r['act2'] ? 'class= "text-muted"' : '');
             
             $t = ($r['cerrado'] ? 'table-danger' : ($r['asamblea'] ? 'table-primary' : 'table-default'));
-            $c = ($r['asamblea'] ? "ASSAMBLEA " : "");
+            $c = ($r['asamblea'] ? "Assemblea " : "");
             $c = $c.$r['coment'];
         ?>
             <tr class= <?php echo $t; ?>>
                 <td><?php echo $fecha; ?></td>
-                <td><?php echo $u1; ?></td>
-                <td><?php echo $u2; ?></td>
+                <td <?php echo $m1; ?>><?php echo $u1; ?></td>
+                <td <?php echo $m2; ?>><?php echo $u2; ?></td>
                 <td><?php echo $c; ?></td>
             </tr>
         <?php } ?>
