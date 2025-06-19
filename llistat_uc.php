@@ -18,7 +18,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
 
     // obtenir llista d'UC amb membres
-    $stmt = $conn -> prepare("SELECT u.uf, u.descrip, u.tresorer
+    $stmt = $conn -> prepare("SELECT u.uf, u.descrip, u.tresorer, u.calendari, u.obertura
         FROM uf u
         LEFT JOIN membres m ON u.uf = m.uf
         WHERE u.uf < 10000 AND u.act = 1
@@ -78,7 +78,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         $res->free();
         echo '<div class="row mb-4">';
         echo "<li><h3>".$r["descrip"]." <small>".$prod."</small></h3>";
+        // tresorera?
         if ($r["tresorer"]) { echo "<h5>Tresorera</h5>"; }
+        // calendari?
+        if ($r["calendari"]) { echo "<h5>Calendari</h5>"; }
+        // no fa obertures?
+        if (!$r["obertura"]) { echo "<h5>NO fa obertures</h5>"; }
 
         // llistat membres
         // obtenir els membres de la UC

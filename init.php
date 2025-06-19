@@ -75,6 +75,33 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $nquotes = $res->num_rows;
     $res->free();
 
+    // propera obertura
+    $fober = "";
+    $stmt = $conn -> prepare('SELECT fecha FROM calendari 
+        WHERE fecha >= NOW() AND (uc1 = ? OR uc2 = ?) 
+        ORDER BY fecha LIMIT 1;');
+    $stmt->bind_param('ii', $uf, $uf);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res->num_rows > 0) {
+        $r = $res->fetch_assoc();
+        $fober = $r["fecha"];
+    }
+    $res->free();
+
+    // propera assemblea
+    $fass = "";
+    $stmt = $conn -> prepare('SELECT fecha FROM calendari 
+        WHERE fecha >= NOW() AND asamblea = 1 
+        ORDER BY fecha LIMIT 1;');
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res->num_rows > 0) {
+        $r = $res->fetch_assoc();
+        $fass = $r["fecha"];
+    }
+    $res->free();
+
     // data actual i de referència per decidir si s'ha de mostrar l'avís
     $date_now = new DateTime();
     $date_ref = new DateTime(getyend()."/01/20");
@@ -91,12 +118,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         <?php if ($nquotes==0 && $date_now>$date_ref){ echo "<h2 class='text-danger'>Quota any ".$year." pendent</h2>"; } ?>
         <?php if ($nmembres==0){ echo "<h2 class='text-warning'>No hi ha membres definits</h2>";
         echo "<h4>Si us plau, utilitzeu el botó Dades UC per completar la informació</h4>"; } ?>
+        <?php if ($fober!=""){ echo "<h3 class='text-warning'>Propera obertura: ".$fober."</h3>" ;} ?>
+        <?php if ($fass!=""){ echo "<h3>Propera assemblea: ".$fass."</h3>" ;} ?>
         <?php if ($act==0){ echo "<h2 class='text-warning'>No es possible fer noves comandes</h2>"; } ?>
     </div>
     <?php if ($act==1){ echo "<a class='btn btn-success btn-block' href='new_comanda.php'>Comanda actual</a>"; } ?>
     <a class='btn btn-primary btn-block' href='history.php'>Històric comandes</a>
-    <a class='btn btn-info btn-block' href='https://docs.google.com/spreadsheets/d/1ELxhd3KJ8p5y4S3GIt5B6dIFghN7xlx6/' target="_blank" rel="noopener noreferrer">Calendari Obertures</a>
-    <?php if ($_SESSION["admin"]==1){ echo "<a class='btn btn-info btn-block' href='calendari.php'>Calendari</a>"; } ?>
+    <!-- <a class='btn btn-info btn-block' href='https://docs.google.com/spreadsheets/d/1ELxhd3KJ8p5y4S3GIt5B6dIFghN7xlx6/' target="_blank" rel="noopener noreferrer">Calendari Obertures</a> -->
+    <a class='btn btn-info btn-block' href='calendari.php'>Calendari Obertures</a>
     <?php if ($_SESSION["admin"]==0) { echo "<a class='btn btn-secondary btn-block' href='edit_uc.php?add=0' >Dades UC</a>"; } ?>
     <?php if ($_SESSION["contacte"]==1){ echo "<a class='btn btn-secondary btn-block' href='llista_items.php?prod=".$prod."' >Editar productes</a>"; } ?>
     <?php if ($_SESSION["admin"]==1 || $_SESSION["tresorer"]==1){ echo "<a class='btn btn-secondary btn-block' href='quotes.php' >Quotes</a>"; } ?>

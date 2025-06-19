@@ -19,17 +19,36 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     $conn = connect();
 
     $edit = $_SESSION["admin"] || $_SESSION["calendari"];
+
+    // obtenir els anys disponibles al calendari
+    $stmt = $conn -> prepare("SELECT DISTINCT YEAR(fecha) as year FROM calendari");
+    $stmt->execute();
+    $years = $stmt->get_result();
+    $nyears = $years->num_rows;
     
-    // get calendari
-    $stmt = $conn -> prepare("SELECT c.fecha, 
-        c.uc1, uf1.descrip AS desc1, uf1.act AS act1, 
-        c.uc2, uf2.descrip AS desc2, uf2.act AS act2, 
-        c.cerrado, c.asamblea, c.coment
-        FROM comandes.calendari c
-        LEFT JOIN comandes.uf uf1 on (uf1.uf = c.uc1)
-        LEFT JOIN comandes.uf uf2 on (uf2.uf = c.uc2)
-        WHERE fecha >= '2024-01-01' ORDER BY fecha");
-//        WHERE fecha >= NOW() ORDER BY fecha");
+    // obtenir les dades del calendari
+    $year = "";
+    if (isset($_GET['y'])) {
+        $year = clear_input($_GET["y"]);
+        $stmt = $conn -> prepare("SELECT c.fecha, 
+            c.uc1, uf1.descrip AS desc1, uf1.act AS act1, 
+            c.uc2, uf2.descrip AS desc2, uf2.act AS act2, 
+            c.cerrado, c.asamblea, c.coment
+            FROM comandes.calendari c
+            LEFT JOIN comandes.uf uf1 on (uf1.uf = c.uc1)
+            LEFT JOIN comandes.uf uf2 on (uf2.uf = c.uc2)
+            WHERE YEAR(fecha) = ? ORDER BY fecha");
+        $stmt->bind_param('s',$year);
+    } else {
+        $stmt = $conn -> prepare("SELECT c.fecha, 
+            c.uc1, uf1.descrip AS desc1, uf1.act AS act1, 
+            c.uc2, uf2.descrip AS desc2, uf2.act AS act2, 
+            c.cerrado, c.asamblea, c.coment
+            FROM comandes.calendari c
+            LEFT JOIN comandes.uf uf1 on (uf1.uf = c.uc1)
+            LEFT JOIN comandes.uf uf2 on (uf2.uf = c.uc2)
+            WHERE fecha >= NOW() ORDER BY fecha");
+    }
     $stmt->execute();
     $cal = $stmt->get_result();
 } else {
@@ -40,7 +59,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
 <?php if ($ok) { ?>
 <div class="container">
     <div class="container p-3 my-3 border">
-        <h1>Calendari d'Obertures</h1>
+        <h1>Calendari d'Obertures: <?php echo ($year=="" ? "Properes" : $year) ?></h1>
+        <p><?php while($r = $years->fetch_assoc()) {
+            echo '<a class="btn btn-link" href="calendari.php?y='.$r["year"].'">'.$r["year"].'</a>';
+        } 
+        echo '<a class="btn btn-link" href="calendari.php">Properes</a>';?></p>
+        <?php if ($edit) echo "<p><a onClick=\"javascript: return confirm('Si us plau, confirma que vols afegir obertures');\" class='btn btn-link' href='add_obertures.php'>Afegir obertures</a>"; ?>
         <p><a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>
@@ -76,7 +100,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     </table>
 </div>
 
-<?php $conn->close();
+<?php $cal->free();
+    $years->free();
+    $conn->close();
 
 } else {
     header("Location: logout.php");

@@ -53,18 +53,50 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
             }
         }
 
+        $errmsg = "";
         if (!$err) {
-            if ($tancat != $d["cerrado"]) {
-                // TANCAR l'obertura
+            if ($tancat && !$d["cerrado"]) {
+                // TANCAR l'obertura: obtenir les obertures a partir de l'actual en ordre descendent
+                $stmt = $conn -> prepare("SELECT * FROM calendari WHERE fecha >= ? ORDER BY fecha DESC");
+                $stmt->bind_param('s',$fecha);
+                $stmt->execute();
+                $cal = $stmt->get_result();
+                // afegir 7 dies a la data d'obertura per moure-les totes cap avall
+                while ($r = mysqli_fetch_array($cal)) {
+                    $f = $r['fecha'];
+                    $stmt = $conn -> prepare("UPDATE calendari SET fecha=DATE_ADD(?, INTERVAL 7 DAY) WHERE fecha=?");
+                    $stmt->bind_param('ss', $f, $f);
+                    $stmt->execute();
+                }
+                $cal->free();
+                // afegir el dia actual TANCAT
+                $stmt = $conn -> prepare("INSERT INTO calendari (fecha, uc1, uc2, cerrado, asamblea, coment)
+                    VALUES (?,NULL,NULL,1,0,?)");
+                $stmt->bind_param('ss', $fecha, $com);
+                $stmt->execute();
             } else {
                 // GRAVAR els canvis
-                $stmt = $conn -> prepare("UPDATE calendari SET fecha=?, uc1=?, uc2 =?, cerrado=?, asamblea=?, coment=? 
-                    WHERE fecha=?");
-                $stmt->bind_param('siiiiss', $fecha, $uc1, $uc2, $tancat, $ass, $com, $fecha0);
-                $stmt->execute();
+                if ($tancat) {
+                    // si TANCAT només es pot canviar el comentari
+                    if ($fecha==$fecha0) {
+                        $stmt = $conn -> prepare("UPDATE calendari SET coment=? WHERE fecha=?");
+                        $stmt->bind_param('ss', $com, $fecha);
+                        $stmt->execute();
+                    }
+                } else {
+                    if ($uc1=="" || $uc2=="") $errmsg = "ATENCIÓ! La Unitat de convivència no pot quedar buida";
+                    if ($errmsg=="") {
+                        $stmt = $conn -> prepare("UPDATE calendari SET fecha=?, uc1=?, uc2 =?, cerrado=?, asamblea=?, coment=? 
+                            WHERE fecha=?");
+                        $stmt->bind_param('siiiiss', $fecha, $uc1, $uc2, $tancat, $ass, $com, $fecha0);
+                        $stmt->execute();
+                    } else {
+                        echo '<script>alert("'.$errmsg.'")</script>';
+                    }
+                }
             }
         }
-        header("Location: calendari.php");
+        if ($errmsg=="") header("Location: calendari.php");
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "GET") {
@@ -81,6 +113,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
         $com = $d["coment"];
         $tancat = $d["cerrado"];
         $ass = $d["asamblea"];
+        $res->free();
     }
 
     // obtenir les dades de les UF pels combos
@@ -107,41 +140,41 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
         <div class="form-group" style="margin-top:10px">
             <label for="fecha">Data:</label>
-            <input type="date" name="fecha" value="<?php echo $fecha; ?>">
+            <input type="date" required name="fecha" value="<?php echo $fecha; ?>">
             <span class="error text-danger"><?php echo $fechaErr;?></span>
         </div>
         
         <div class="form-group" style="margin-top:10px">
             <label for="uf1">Unitat de convivència 1:</label>
             <?php $found1 = false; ?>
-            <select name="uf1" required class="custom-select">
+            <select name="uf1" class="custom-select">
                 <option></option>
                 <?php while ($r1 = mysqli_fetch_array($duf1)) {
                     $sel = ($r1["uf"]==$uc1 ? "selected" : "");
                     if ($r1["uf"]==$uc1) $found1 = true;
                     echo "<option ".$sel." value=".$r1["uf"].">".$r1["descrip"]."</option>";
                 }
-                if (!$found1) 
+                if (!$found1 && $uc1!='') 
                     echo "<option selected value=".$uc1.">".getdescrip($conn,$uc1)."</option>"; ?>
             </select>
-            <?php if (!$found1) 
+            <?php if (!$found1 && $uc1!='') 
                 echo '<span class="text-warning">ATENCIÓ! La UC assignada NO està activa</span>'; ?>
         </div>
 
         <div class="form-group" style="margin-top:10px">
             <label for="uf2">Unitat de convivència 2:</label>
             <?php $found2 = false; ?>
-            <select name="uf2" required class="custom-select">
+            <select name="uf2" class="custom-select">
                 <option></option>
                 <?php while ($r2 = mysqli_fetch_array($duf2)) {
                     $sel = ($r2["uf"]==$uc2 ? "selected" : "");
                     if ($r2["uf"]==$uc2) $found2 = true;
                     echo "<option ".$sel." value=".$r2["uf"].">".$r2["descrip"]."</option>";
                 } 
-                if (!$found2) 
+                if (!$found2 && $uc2!='') 
                     echo "<option selected value=".$uc2.">".getdescrip($conn,$uc2)."</option>"; ?>
             </select>
-            <?php if (!$found2) 
+            <?php if (!$found2 && $uc2!='') 
                 echo '<span class="text-warning">ATENCIÓ! La UC assignada NO està activa</span>'; ?>
         </div>
 
@@ -172,6 +205,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
 </div>
 
 <?php
+    $duf1->free();
+    $duf2->free();
     $res->free();
     $conn->close();
 } else {

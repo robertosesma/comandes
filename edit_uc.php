@@ -32,6 +32,12 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $istresorer = 0;
             if (isset($_POST["tresorer"])) $istresorer = (clear_input($_POST["tresorer"])=="activado");
             $istresorer = ($istresorer == 1 ? 1 : 0);
+            $iscalendari = 0;
+            if (isset($_POST["calendari"])) $iscalendari = (clear_input($_POST["calendari"])=="activado");
+            $iscalendari = ($iscalendari == 1 ? 1 : 0);
+            $obertura = 0;
+            if (isset($_POST["obertura"])) $obertura = (clear_input($_POST["obertura"])=="activado");
+            $obertura = ($obertura == 1 ? 1 : 0);
             if ($admin==1) {
                 $activado = 0;
                 if (isset($_POST["act"])) $activado = clear_input($_POST["act"]=="activado");
@@ -75,16 +81,16 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 if ($add==1) {
                     // afegir nova UC
                     $uf = getnextuf($conn);
-                    $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip,psswd,email,act,admin,tresorer) VALUES (?,?,?,?,?,?,?)");
-                    $stmt->bind_param('isssiii', $uf, $descrip, $password, $mail, $activado, $isadmin, $istresorer);
+                    $stmt = $conn -> prepare("INSERT INTO uf (uf,descrip,psswd,email,act,admin,tresorer,calendari,obertura) VALUES (?,?,?,?,?,?,?,?,?)");
+                    $stmt->bind_param('isssiiiii', $uf, $descrip, $password, $mail, $activado, $isadmin, $istresorer, $iscalendari, $obertura);
                 } else {
                     // editar UC existent
                     if (strlen($pswd)>0) {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=?, tresorer=? WHERE uf=?");
-                        $stmt->bind_param('sssiiii', $descrip, $mail, $password, $activado, $isadmin, $istresorer, $uf);
+                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
+                        $stmt->bind_param('sssiiiiii', $descrip, $mail, $password, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
                     } else {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=?, tresorer=? WHERE uf=?");
-                        $stmt->bind_param('ssiiii', $descrip, $mail, $activado, $isadmin, $istresorer, $uf);
+                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
+                        $stmt->bind_param('ssiiiiii', $descrip, $mail, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
                     }
                 }
                 $stmt->execute();
@@ -128,6 +134,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     $activado = $r["act"];
                     $istresorer = $r["tresorer"];
                     $isadmin = $r["admin"];
+                    $iscalendari = $r["calendari"];
+                    $obertura = $r["obertura"];
                     // obtenir els membres de la UC
                     $stmt = $conn -> prepare("SELECT * FROM membres WHERE uf=? ORDER BY ape, nom");
                     $stmt->bind_param('i', $uf);
@@ -141,7 +149,10 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 $uf = '';
                 $descrip = '';
                 $mail = '';
+                $isadmin = 0;               // no és admin per defecte
                 $istresorer = 0;            // no és tresorer per defecte
+                $iscalendari = 0;           // no és calendari per defecte
+                $obertura = 1;              // fa obertures per defecte
                 $activado = 1;              // activada per defecte
                 $pswd = generatepswd(8);    // generate pswd: by default 8 chars
             }
@@ -206,6 +217,20 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     <input type="checkbox" class="custom-control-input" name="tresorer" id="tresorer"
                         value="activado" <?php echo ($istresorer==1 ? "checked" : ""); ?>>
                     <label class="custom-control-label" for="tresorer">Tresorera</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" name="calendari" id="calendari"
+                        value="activado" <?php echo ($iscalendari==1 ? "checked" : ""); ?>>
+                    <label class="custom-control-label" for="calendari">Calendari</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" name="obertura" id="obertura"
+                        value="activado" <?php echo ($obertura==1 ? "checked" : ""); ?>>
+                    <label class="custom-control-label" for="obertura">Obertures</label>
                 </div>
             </div>
             <div class="form-group">
