@@ -69,14 +69,13 @@ if ($ok) { ?>
             if ($prod != $r["prod"]) {
                 $prod = $r["prod"];
                 echo '<h3>'.$prod.'</h3>';
-            } else {
-                $it = 'it'.$r["tipo"];
-                $desc = $r["descrip"];
-                $checked = ($r["desactivado"]==1 ? "checked" : "");
-                echo "<div class='form-group'>";
-                echo "<label><input type='checkbox' name='$it' ".$checked."> $desc</label>";
-                echo "</div>";
             }
+            $it = 'it'.$r["tipo"];
+            $desc = $r["descrip"];
+            $checked = ($r["desactivado"]==1 ? "checked" : "");
+            echo "<div class='form-group'>";
+            echo "<label><input type='checkbox' name='$it' ".$checked."> $desc</label>";
+            echo "</div>";
         } ?>
         <input type="text" class="form-control" hidden="true" name="fecha" value=" <?php echo $fecha; ?> ">
         </form>

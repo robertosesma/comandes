@@ -78,7 +78,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     // propera obertura
     $fober = "";
     $stmt = $conn -> prepare('SELECT fecha FROM calendari 
-        WHERE fecha >= NOW() AND (uc1 = ? OR uc2 = ?) 
+        WHERE fecha >= CURRENT_DATE() AND (uc1 = ? OR uc2 = ?) 
         ORDER BY fecha LIMIT 1;');
     $stmt->bind_param('ii', $uf, $uf);
     $stmt->execute();
@@ -92,7 +92,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     // propera assemblea
     $fass = "";
     $stmt = $conn -> prepare('SELECT fecha FROM calendari 
-        WHERE fecha >= NOW() AND asamblea = 1 
+        WHERE fecha >= CURRENT_DATE() AND asamblea = 1 
         ORDER BY fecha LIMIT 1;');
     $stmt->execute();
     $res = $stmt->get_result();
