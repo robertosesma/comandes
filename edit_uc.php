@@ -29,27 +29,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             $uf = clear_input($_POST["uf"]);
             $descrip = clear_input($_POST["descrip"]);
             $mail = clear_input($_POST["mail"]);
-            $istresorer = 0;
-            if (isset($_POST["tresorer"])) $istresorer = (clear_input($_POST["tresorer"])=="activado");
-            $istresorer = ($istresorer == 1 ? 1 : 0);
-            $iscalendari = 0;
-            if (isset($_POST["calendari"])) $iscalendari = (clear_input($_POST["calendari"])=="activado");
-            $iscalendari = ($iscalendari == 1 ? 1 : 0);
-            $obertura = 0;
-            if (isset($_POST["obertura"])) $obertura = (clear_input($_POST["obertura"])=="activado");
-            $obertura = ($obertura == 1 ? 1 : 0);
-            if ($admin==1) {
-                $activado = 0;
-                if (isset($_POST["act"])) $activado = clear_input($_POST["act"]=="activado");
-                $activado = ($activado == 1 ? 1 : 0);
-                $isadmin = 0;
-                if (isset($_POST["admin"])) $isadmin = clear_input($_POST["admin"]=="activado");
-                $isadmin = ($isadmin == 1 ? 1 : 0);
-                echo "*$activado*";
-            } else {
-                $activado = 1;
-                $isadmin = 0;
-            }
             $pswd = clear_input($_POST["pswd1"]);
             // verificar contrasenya
             $password = '';
@@ -76,8 +55,21 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                 }
             }
             $dades->free();
+            // dades disponibles només per l'admin
+           if ($admin==1) {
+                $istresorer = (clear_input($_POST["tresorer"])=="activado");
+                $iscalendari = (clear_input($_POST["calendari"])=="activado");
+                $obertura = (clear_input($_POST["obertura"])=="activado");
+                $activado = clear_input($_POST["act"]=="activado");
+                $isadmin = clear_input($_POST["admin"]=="activado");
+            }
+            // obtenir els membres de la UC
+            $stmt = $conn -> prepare("SELECT * FROM membres WHERE uf=? ORDER BY ape, nom");
+            $stmt->bind_param('i', $uf);
+            $stmt->execute();
+            $members = $stmt->get_result();
             if (!$err) {
-                //  no hi ha errors
+                // no hi ha errors
                 if ($add==1) {
                     // afegir nova UC
                     $uf = getnextuf($conn);
@@ -85,12 +77,18 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     $stmt->bind_param('isssiiiii', $uf, $descrip, $password, $mail, $activado, $isadmin, $istresorer, $iscalendari, $obertura);
                 } else {
                     // editar UC existent
-                    if (strlen($pswd)>0) {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
-                        $stmt->bind_param('sssiiiiii', $descrip, $mail, $password, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
+                    if ($admin==1) {
+                        if (strlen($pswd)>0) {
+                            $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, psswd =?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
+                            $stmt->bind_param('sssiiiiii', $descrip, $mail, $password, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
+                        } else {
+                            $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
+                            $stmt->bind_param('ssiiiiii', $descrip, $mail, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
+                        }
                     } else {
-                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?, act=?, admin=?, tresorer=?, calendari=?, obertura=? WHERE uf=?");
-                        $stmt->bind_param('ssiiiiii', $descrip, $mail, $activado, $isadmin, $istresorer, $iscalendari, $obertura, $uf);
+                        $stmt = $conn -> prepare("UPDATE uf SET descrip=?, email=?".(strlen($pswd)>0 ? ", psswd =?" : "")." WHERE uf=?");
+                        if (strlen($pswd)>0) $stmt->bind_param('sssi', $descrip, $mail, $password, $uf);
+                        else $stmt->bind_param('ssi', $descrip, $mail, $uf);
                     }
                 }
                 $stmt->execute();
