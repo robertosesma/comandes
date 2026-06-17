@@ -2,9 +2,6 @@
 session_start();
 
 require '../vendor/autoload.php';
-
-use PhpOffice\PhpSpreadsheet\Chart\Layout;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 include 'func_aux.php';
 
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true

@@ -146,6 +146,59 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     </div>
 </div>
 
+<div class="container">
+<h3>Contactes de productora / Tresoreria / Calendari</h3>
+<ol>
+<?php         
+    // obtenir les UC contactes de productora o tresoreres
+    $stmt = $conn -> prepare("SELECT u.uf, u.descrip AS duc, u.tresorer, u.calendari, d.descrip as prod FROM uf u
+                        LEFT JOIN dgrupo d ON u.uf = d.uf
+                        WHERE u.uf < 10000 AND (d.uf IS NOT NULL OR u.tresorer = 1 OR u.calendari = 1)");
+    $stmt->execute();
+    $res = $stmt->get_result(); 
+    while ($r = mysqli_fetch_array($res)) {
+        $c = ($r["tresorer"] ? "Tresorera" : ($r["calendari"] ? "Calendari" : "Contacte de ".$r["prod"]));
+        echo "<li><h4>".$r["duc"].": <small>".$c."</small></h4>";
+    }
+?>
+</ol>
+</div>
+
+<div class="container mt-5">
+<h3>NO fan obertures</h3>
+<ol>
+<?php         
+    // obtenir les UC que no fan obertures
+    $stmt = $conn -> prepare("SELECT uf, descrip FROM uf WHERE uf < 10000 AND act = 1 AND obertura = 0");
+    $stmt->execute();
+    $res = $stmt->get_result(); 
+    while ($r = mysqli_fetch_array($res)) {
+        echo "<li><h4>".$r["descrip"]."</h4>";
+    }
+?>
+</ol>
+</div>
+
+<div class="container mt-5">
+<h3>SENSE membres definits</h3>
+<ol>
+<?php         
+    // obtenir les UC que no tenen membres definits
+    $stmt = $conn -> prepare("SELECT u.uf, u.descrip
+        FROM uf u
+        LEFT JOIN membres m ON u.uf = m.uf
+        WHERE u.uf < 10000 AND u.act = 1
+        GROUP BY u.uf
+        HAVING COUNT(m.uf)=0");
+    $stmt->execute();
+    $res = $stmt->get_result(); 
+    while ($r = mysqli_fetch_array($res)) {
+        echo "<li><h4>".$r["descrip"]."</h4>";
+    }
+?>
+</ol>
+</div>
+
 <?php
     $dades->free();
     $conn->close();
