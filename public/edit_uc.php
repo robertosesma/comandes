@@ -20,6 +20,7 @@ $err = false;
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username'])) {
     $conn = connect();
     $admin = $_SESSION['admin'];
+    $lmembers = false;
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $add = clear_input($_POST["add"]);
@@ -139,6 +140,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     $stmt->bind_param('i', $uf);
                     $stmt->execute();
                     $members = $stmt->get_result();
+                    if ($members->num_rows > 0) $lmembers = true;
                 } else {
                     $ok = false;
                 }
@@ -239,8 +241,6 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
                     <label class="custom-control-label" for="admin">Administrador</label>
                 </div>
             </div>
-        <?php } else { ?>
-            <input type="text" class="form-control" hidden="true" name="tresorer" value=" <?php echo $tresorer; ?> ">
         <?php } ?>
 
         <a class="btn btn-link" href="edit_membre.php?add=1">Afegir membre</a>
@@ -255,17 +255,19 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             </thead>
             <tbody>
                 <?php
-                while ($r = mysqli_fetch_array($members)) { ?>
-                    <tr>
-                        <td><?php $edit = 'edit_membre.php?add=0&uf='.$r["uf"].'&n='.$r["n"];
-                        $nom = $r["nom"]." ".$r["ape"];
-                        echo "<a href='".$edit."'>".$nom."</a>"; ?></td>
-                        <td><?php echo $r["tel"]; ?></td>
-                        <td><?php echo $r["email"]; ?></td>
-                        <?php $del = 'del_membre.php?uf='.$r["uf"].'&n='.$r["n"];
-                        echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td>"; ?>
-                    </tr>
-                <?php } ?>
+                if ($lmembers) {
+                    while ($r = mysqli_fetch_array($members)) { ?>
+                        <tr>
+                            <td><?php $edit = 'edit_membre.php?add=0&uf='.$r["uf"].'&n='.$r["n"];
+                            $nom = $r["nom"]." ".$r["ape"];
+                            echo "<a href='".$edit."'>".$nom."</a>"; ?></td>
+                            <td><?php echo $r["tel"]; ?></td>
+                            <td><?php echo $r["email"]; ?></td>
+                            <?php $del = 'del_membre.php?uf='.$r["uf"].'&n='.$r["n"];
+                            echo "<td><a onClick=\"javascript: return confirm('Si us plau, confirma que vols esborrar');\" href='".$del."'>x</a></td>"; ?>
+                        </tr>
+                    <?php }
+                } ?>
             </tbody>
         </table>
 

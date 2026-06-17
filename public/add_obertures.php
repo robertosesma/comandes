@@ -4,8 +4,9 @@ include 'func_aux.php';
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && 
     ((isset($_SESSION['admin']) && $_SESSION['admin'] == true) || 
      (isset($_SESSION['calendari']) && $_SESSION['calendari'] == true))) {
-        $conn = connect();
+    $conn = connect();
 
+    try {
         // obtenir l'última data i l'última uf del calendari
         $stmt = $conn -> prepare("SELECT c.fecha, c.uc2, u.descrip AS desc2
             FROM calendari c 
@@ -24,6 +25,8 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
         $uf = $stmt->get_result();
         // bucle per les uf per afegir noves dates al calendari
         while ($u = mysqli_fetch_array($uf)) {
+            // afegir 7 dies a la data
+            $fecha = date('Y-m-d', strtotime($fecha.' + 7 days'));
             // la uc actual és la 2ª en la iteració actual
             $uc2 = $u["uf"];
             $stmt = $conn -> prepare("INSERT INTO calendari (fecha, uc1, uc2, cerrado, asamblea, coment)
@@ -32,13 +35,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
             $stmt->execute();
             // la uc actual és la 1ª en la següent iteració
             $uc1 = $uc2;
-            // afegir 7 dies a la data
-            $fecha = date('Y-m-d', strtotime($fecha.' + 7 days'));
         }
         $uf->free();
         $conn->close();
 
         echo '<script>window.location.href = "calendari.php";</script>';
+    } catch (Exception $e) {
+        echo 'Mensaje de error: ',  $e->getMessage(), "\n";
+    }
 }
-exit();
+// exit();
 ?>

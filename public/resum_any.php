@@ -172,14 +172,16 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
             <tbody>
             <?php $count = 1;
             while ($r = mysqli_fetch_array($ucs)) {
-                echo ($r["act"]==1 ? "<tr>" : "<tr class=table-secondary>");
-                echo "<td><strong>".$count."</strong></td>";
-                echo "<td><div class='text-center'>".$r["descrip"].($r["act"]==0 ? "<small> (desactivada)</small>" : "")."</td>";
-                echo "<td><div class='text-center'>".$r["n"]."</td>";
-                echo "<td><div class='text-center'>".($r["n"]>0 ? getascurr($r["total"],"") : "")."</td>";
-                echo "<td><div class='text-center'>".$r["last"]."</td>";
-                echo "</tr>";
-                $count = $count + 1;
+                if ($r["act"]==1 || $r["n"]>0) {
+                    echo ($r["act"]==1 ? "<tr>" : "<tr class=table-secondary>");
+                    echo "<td><strong>".$count."</strong></td>";
+                    echo "<td><div class='text-center'>".$r["descrip"].($r["act"]==0 ? "<small> (desactivada)</small>" : "")."</td>";
+                    echo "<td><div class='text-center'>".$r["n"]."</td>";
+                    echo "<td><div class='text-center'>".($r["n"]>0 ? getascurr($r["total"],"") : "")."</td>";
+                    echo "<td><div class='text-center'>".$r["last"]."</td>";
+                    echo "</tr>";
+                    $count = $count + 1;
+                }
             } ?>
             </tbody>
         </table>

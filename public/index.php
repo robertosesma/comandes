@@ -1,18 +1,4 @@
-<?php session_start(); ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Atzur</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="carxofa.png"/>
-</head>
-
-<body>
-<?php
+<?php session_start(); 
 include 'func_aux.php';
 // define variables and set to empty values
 $pswdErr = "";
@@ -58,6 +44,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Atzur</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="carxofa.png"/>
+</head>
+
+<body>
 <div class="container">
     <div>
         <a class="btn btn-link" href="info.html">Informació</a>

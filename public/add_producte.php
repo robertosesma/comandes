@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <head>
     <script
         src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -7,7 +9,6 @@
 </head>
 
 <?php
-session_start();
 include 'func_aux.php';
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SESSION['username']) && isset($_SESSION['fecha'])) {
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
