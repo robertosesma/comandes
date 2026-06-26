@@ -96,11 +96,24 @@ function isopen($conn){
 }
 
 function getnext($conn){
-    $stmt = $conn -> prepare("SELECT next FROM admin");
+    $next = '';
+    // la data de la próxima comanda s'agafa del calendari
+    $stmt = $conn -> prepare("SELECT fecha FROM calendari 
+        WHERE fecha >= CURRENT_DATE() ORDER BY fecha LIMIT 1");
     $stmt->execute();
-    $dades = $stmt->get_result();
-    $r = mysqli_fetch_array($dades);
-    $next = date('Y-m-d',strtotime($r["next"]));
+    $d = $stmt->get_result();
+    if ($d->num_rows > 0) {
+        $r = $d->fetch_assoc();
+        $next = $r["fecha"];
+    } else {
+        // si no hi ha data al calendari, es calcula
+        $stmt = $conn -> prepare("SELECT next FROM admin");
+        $stmt->execute();
+        $d = $stmt->get_result();
+        $r = $d->fetch_assoc();
+        $next = date('Y-m-d',strtotime($r["next"]));
+    }
+    $d->free();
     return $next;
 }
 

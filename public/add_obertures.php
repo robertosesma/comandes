@@ -7,6 +7,13 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
     $conn = connect();
 
     try {
+        // defecte per la próxima comanda
+        $stmt = $conn -> prepare("SELECT next FROM admin");
+        $stmt->execute();
+        $d = $stmt->get_result();
+        $r = $d->fetch_assoc();
+        $next = $r["next"];
+
         // obtenir l'última data i l'última uf del calendari
         $stmt = $conn -> prepare("SELECT c.fecha, c.uc2, u.descrip AS desc2
             FROM calendari c 
@@ -26,7 +33,14 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true &&
         // bucle per les uf per afegir noves dates al calendari
         while ($u = mysqli_fetch_array($uf)) {
             // afegir 7 dies a la data
-            $fecha = date('Y-m-d', strtotime($fecha.' + 7 days'));
+            $date0 = new DateTime($fecha);
+            $date = new DateTime($fecha);
+            $date->modify($next);       // modificar per obtenir la propera data
+            // corregir si la nova data és a la mateixa setmana
+            $diff = $date0->diff($date);
+            if ($diff->days<6) $date->modify($next);
+            $fecha = $date->format('Y-m-d');
+
             // la uc actual és la 2ª en la iteració actual
             $uc2 = $u["uf"];
             $stmt = $conn -> prepare("INSERT INTO calendari (fecha, uc1, uc2, cerrado, asamblea, coment)

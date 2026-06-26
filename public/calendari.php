@@ -65,6 +65,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
         } 
         echo '<a class="btn btn-link" href="calendari.php">Properes</a>';?></p>
         <?php if ($edit) echo "<p><a onClick=\"javascript: return confirm('Si us plau, confirma que vols afegir obertures');\" class='btn btn-link' href='add_obertures.php'>Afegir obertures</a>"; ?>
+        <?php if ($edit) echo "<p><a onClick=\"javascript: return confirm('Si us plau, confirma que vols afegir una obertura');\" class='btn btn-link' href='add_obertura.php'>Afegir una obertura al final</a>"; ?>
         <p><a class="btn btn-link" href="init.php">Tornar</a>
         <a class="btn btn-link" href="logout.php">Sortir</a></p>
     </div>

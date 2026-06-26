@@ -56,6 +56,17 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true && isset($_SES
     while ($r = $res->fetch_assoc()) {
         $act = $r["comanda_act"];
     }
+    // la següent data del calendari està tancada?
+    if ($act) {
+        $stmt = $conn -> prepare('SELECT cerrado FROM calendari 
+            WHERE fecha >= CURRENT_DATE() ORDER BY fecha LIMIT 1');
+        $stmt->execute();
+        $d = $stmt->get_result();
+        if ($d->num_rows > 0) {
+            $r = $d->fetch_assoc();
+            $act = ($r["cerrado"]==0);
+        }
+    }
     $res->free();
 
     // hi ha membres definits?
