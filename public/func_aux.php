@@ -99,7 +99,7 @@ function getnext($conn){
     $next = '';
     // la data de la próxima comanda s'agafa del calendari
     $stmt = $conn -> prepare("SELECT fecha FROM calendari 
-        WHERE fecha >= CURRENT_DATE() ORDER BY fecha LIMIT 1");
+        WHERE fecha > CURRENT_DATE() ORDER BY fecha LIMIT 1");
     $stmt->execute();
     $d = $stmt->get_result();
     if ($d->num_rows > 0) {
