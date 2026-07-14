@@ -80,7 +80,8 @@ function isopen($conn){
     $hini = $r["hini"];
     $dend = $r["dend"];
     $hend = $r["hend"];
-    // dia i hora actuals
+    // dia i hora actuals (locals)
+    date_default_timezone_set("Europe/Madrid");
     $day = date("N");
     $hour = date("H");
     // comprovar si estem en temps de comanda
